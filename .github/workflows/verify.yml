@@ -23,3 +23,9 @@ jobs:
             package-lock.json
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run package:demo
+      - run: node scripts/check-portable.mjs
+      - uses: actions/upload-artifact@v5
+        with:
+          name: promptvault-complete-project
+          path: release/

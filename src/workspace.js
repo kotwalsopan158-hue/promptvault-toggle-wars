@@ -19,7 +19,9 @@ export async function visitor(fresh = false) {
       return { id: next, persistent: false }
     }
   }
-  if (globalThis.navigator?.locks) return navigator.locks.request('promptvault-identity', select)
+  if (globalThis.navigator?.locks) {
+    try { return await navigator.locks.request('promptvault-identity', select) } catch { /* Some local file origins disable Web Locks. */ }
+  }
   return select()
 }
 
