@@ -8,3 +8,5 @@ playwright-report/
 .sites-runtime/
 *.log
 .DS_Store
+.promptvault-lab/
+lab-output/
