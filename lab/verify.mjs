@@ -25,6 +25,14 @@ try {
   page.on('response', r => {
     if (!r.ok() && new URL(r.url()).hostname === '127.0.0.1') console.error('HTTP', r.status(), new URL(r.url()).pathname)
   })
+  page.on('requestfailed', request => {
+    if (request.url().includes('/events')) console.error('Ingestion transport failed', request.failure()?.errorText)
+  })
+  page.on('response', async r => {
+    if (!intake(r)) return
+    const events = r.request().postDataJSON()?.events || []
+    console.log('Ingestion POST', r.status(), 'events:', events.length, 'response:', (await r.text().catch(() => '')).slice(0, 200))
+  })
   const tracked = type => page.waitForResponse(r => intake(r) && r.ok() && r.request().postDataJSON()?.events?.some(e => e.event === type))
   const exposure = tracked('$flag_exposure')
   await page.goto(url)
@@ -49,6 +57,7 @@ try {
     await page.getByText('Batch finished', { exact: true }).waitFor({ timeout: 120000 })
     const href = await page.getByRole('link', { name: 'Download run receipt' }).getAttribute('href')
     const receipt = JSON.parse(decodeURIComponent(href.slice(href.indexOf(',') + 1)))
+    console.log('Batch totals', JSON.stringify({ attempted: receipt.visitors_attempted, skipped: receipt.visitors_skipped, queued: receipt.sdk_queued_by_arm, accepted: receipt.http_accepted_distinct_ids }))
     assert.equal(receipt.http_accepted_distinct_ids.exposures, 100, 'Ingestion must acknowledge every synthetic exposure')
     assert.equal(receipt.visitors_skipped, 0)
     receipts.push(receipt)

@@ -74,7 +74,7 @@ test('one hundred unique synthetic visitors use assigned arms, their own IDs, an
     () => 'sim_' + i++, () => 0.2)
   assert.equal(new Set(log.exposures).size, 100)
   assert.equal(log.ids.length, 99)
-  assert.equal(log.flushes, 1)
+  assert.equal(log.flushes, 4)
   assert.equal(stats.variants.control.conversions, 0)
   assert.equal(stats.variants.guided_templates.conversions, 50)
   assert.equal(log.saves.every(x => log.exposures.includes(x.identifier) && x.metadata.traffic_kind === 'synthetic'), true)

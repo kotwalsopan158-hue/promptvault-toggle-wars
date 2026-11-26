@@ -116,6 +116,7 @@ export async function simulateVisitors(client, onProgress, newId, random = Math.
           arm.conversions++
         }
       }
+      if ((i + 1) % 25 === 0 && i + 1 < 100) await client.flush()
       onProgress(structuredClone(stats))
     }
   } finally {
