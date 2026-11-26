@@ -1,0 +1,29 @@
+{
+  "name": "promptvault-toggle-wars",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@flagsmith/flagsmith": "12.4.0",
+    "@fontsource-variable/dm-sans": "5.2.6",
+    "lucide-react": "0.545.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1",
+    "autoprefixer": "10.4.21",
+    "fake-indexeddb": "6.2.4",
+    "postcss": "8.5.6",
+    "tailwindcss": "3.4.17",
+    "vite": "7.3.1"
+  }
+}
