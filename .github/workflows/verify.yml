@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
@@ -14,6 +14,8 @@ jobs:
       - name: Install exact dependencies
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Record the dependency lock from the first clean install
+        run: node -e "console.log('PROMPTVAULT_LOCK '+require('node:zlib').gzipSync(require('node:fs').readFileSync('package-lock.json')).toString('base64'))"
       - run: npm test
       - run: npm run build
       - name: Save production build and dependency lock
