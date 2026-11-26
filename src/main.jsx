@@ -98,9 +98,9 @@ function App() {
   }, [identity, ready])
 
   const displayedVariant = preview || assignment.variant
-  function openEditor(record) {
+  function openEditor(record, openInputs = false) {
     setSaveError(''); setToast(null)
-    if (record) setDraft(record)
+    if (record) setDraft({ ...record, openInputs })
     else {
       const seed = !items.length && displayedVariant === GUIDED ? decisionBrief : { title: '', prompt: '' }
       setDraft({ ...seed, id: visitorId('wf') })
@@ -136,8 +136,8 @@ function App() {
   }
 
   async function copy(text) {
-    try { await navigator.clipboard.writeText(text); notify('Prompt copied to clipboard.') }
-    catch { notify('Clipboard unavailable. Open the workflow and select the prompt to copy it.') }
+    try { await navigator.clipboard.writeText(text); notify('Prompt copied to clipboard.'); return true }
+    catch { notify('Clipboard unavailable. Select the prompt and copy it manually.'); return false }
   }
 
   return (
@@ -151,7 +151,7 @@ function App() {
       {storageError && <div className="notice" role="alert"><Database size={16} />{storageError}</div>}
       {!ready ? <main id="main" className="page loading-page" aria-busy="true"><div className="context">Personal workspace</div>
         <h1>Workflow library</h1><p role="status">Opening your workspace.</p></main>
-        : draft ? <Editor key={draft.id} draft={draft} editing={items.some(i => i.id === draft.id)} onCancel={() => setDraft(null)} onSave={save} saving={saving} error={saveError} />
+        : draft ? <Editor key={draft.id} draft={draft} editing={items.some(i => i.id === draft.id)} onCancel={() => setDraft(null)} onSave={save} copy={copy} saving={saving} error={saveError} />
         : <Library items={items} variant={displayedVariant} preview={preview} create={() => openEditor()} edit={openEditor} copy={copy} />}
       <Inspector identity={identity} assignment={assignment} preview={preview} setPreview={setPreview}
         canPreview={demoMode && ready && assignment.source === 'fallback' && !draft && items.length === 0}

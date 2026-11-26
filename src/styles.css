@@ -1088,3 +1088,32 @@ input::placeholder,textarea::placeholder {
   }
 
 }
+
+.use-panel {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+}
+.use-panel summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 22px;
+  font-weight: 620;
+  color: #514365;
+}
+.use-panel summary::after {
+  content: '+';
+  margin-left: auto;
+}
+.use-panel[open] summary::after { content: '−'; }
+.use-content { padding: 0 22px 20px; }
+.use-content > p { color: var(--muted); font-size: .94rem; }
+.use-field { margin-top: 14px; }
+.use-field textarea {
+  min-height: 62px;
+  font-weight: 400;
+}
+.use-field textarea[readonly] { background: #f8f7fa; }
+.use-content .button { margin-top: 14px; }

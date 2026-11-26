@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Activity, FlaskConical, Layers3, Play, Radio, UserRoundPlus, X } from 'lucide-react'
-import { CONTROL, GUIDED, simulateVisitors } from './experiment'
-import { configuredId, connectDemo, demoMode, environmentID, simulationClient } from './runtime'
-import { visitorId } from './workspace'
+import { Activity, Download, FlaskConical, Layers3, Play, Radio, UserRoundPlus, X } from 'lucide-react'
+import { CONTROL, GUIDED } from './experiment'
+import { configuredId, connectDemo, demoMode, environmentID, runDemoBatch } from './runtime'
 
 function Simulator({ busy, setBusy, notify }) {
   const [stats, setStats] = useState(null)
+  const [receipt, setReceipt] = useState(null)
   const [failure, setFailure] = useState('')
   const running = useRef(false)
   const canRun = demoMode && Boolean(environmentID)
@@ -15,8 +15,10 @@ function Simulator({ busy, setBusy, notify }) {
     setBusy(true)
     setFailure('')
     setStats(null)
+    setReceipt(null)
     try {
-      const result = await simulateVisitors(simulationClient(), setStats, () => visitorId('sim'))
+      const { stats: result, receipt: report } = await runDemoBatch(setStats)
+      setReceipt(report)
       notify(result.error ? 'Simulation stopped. See the inspector.' : 'Simulation finished. Check ingestion in Flagsmith.')
     } catch {
       setFailure('The run stopped. Check the demo environment and try again.')
@@ -39,6 +41,11 @@ function Simulator({ busy, setBusy, notify }) {
           <tbody>{[CONTROL, GUIDED].map(v => <tr key={v}><th>{v === CONTROL ? 'Control' : 'Guided'}</th>
             <td>{stats?.variants[v].exposures ?? 0}</td><td>{stats?.variants[v].conversions ?? 0}</td></tr>)}</tbody></table>
         {stats && !busy && <p>{stats.skipped} skipped. Final flush requested. Confirm receipt in the demo dashboard.</p>}
+      </div>}
+      {receipt && <div className="delivery-receipt">
+        <p>Ingestion acknowledged <strong>{receipt.http_accepted_distinct_ids.exposures}</strong> exposures and <strong>{receipt.http_accepted_distinct_ids.conversions}</strong> saves from this synthetic batch.</p>
+        <a className="button secondary fill" href={'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(receipt, null, 2))}
+          download={'promptvault-' + receipt.run_id + '.json'}><Download size={16} />Download run receipt</a>
       </div>}
       {(failure || stats?.error) && <p className="form-error" role="alert">{failure || stats.error}</p>}
     </section>

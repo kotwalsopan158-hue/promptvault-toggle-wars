@@ -1,5 +1,7 @@
 import flagsmith, { createFlagsmithInstance } from '@flagsmith/flagsmith'
-import { createExperimentClient } from './experiment'
+import { boundedFetch, createExperimentClient, simulateVisitors } from './experiment.js'
+import { createBatchReceipt } from './receipts.js'
+import { visitorId } from './workspace.js'
 
 const variables = import.meta.env
 export const demoMode = (variables.VITE_TRAFFIC_MODE || 'demo') === 'demo'
@@ -10,30 +12,49 @@ function demoOverride() {
   try { return sessionStorage.getItem(sessionKey) || '' } catch { return '' }
 }
 
-export const environmentID = configuredId || (demoMode ? demoOverride() : '')
-export const liveClient = createExperimentClient(flagsmith, environmentID)
+let activeBatch = null
 let simulator
-export function simulationClient() {
+export const environmentID = configuredId || (demoMode ? demoOverride() : '')
+
+// Both SDK instances use the same transport. Only event batches acknowledged by HTTP
+// and carrying this run's unique prefix contribute to the optional simulator receipt.
+async function deliveryFetch(url, options) {
+  const response = await boundedFetch(url, options)
+  if (activeBatch && response.ok && options?.method === 'POST' && /\/v1\/events\/?$/.test(String(url))) {
+    try { activeBatch.accept(JSON.parse(options.body).events) } catch { /* A receipt never interrupts delivery. */ }
+  }
+  return response
+}
+
+const sdkOptions = { fetch: deliveryFetch }
+if (variables.VITE_FLAGSMITH_API_URL) sdkOptions.api = variables.VITE_FLAGSMITH_API_URL
+if (variables.VITE_FLAGSMITH_EVENTS_URL) sdkOptions.eventsApiUrl = variables.VITE_FLAGSMITH_EVENTS_URL
+export const liveClient = createExperimentClient(flagsmith, environmentID, sdkOptions)
+
+export async function runDemoBatch(onProgress) {
   if (!demoMode || !environmentID) throw new Error('Connect a dedicated demo environment first.')
-  simulator ??= createExperimentClient(createFlagsmithInstance(), environmentID)
-  return simulator
+  if (activeBatch) throw new Error('Another batch is already running.')
+  simulator ??= createExperimentClient(createFlagsmithInstance(), environmentID, { ...sdkOptions, batchOnly: true })
+  const batch = createBatchReceipt(visitorId('run'))
+  activeBatch = batch
+  try {
+    const stats = await simulateVisitors(simulator, onProgress, batch.nextId)
+    return { stats, receipt: batch.finish(stats) }
+  } finally { activeBatch = null }
 }
 
 export function connectDemo(id) {
   if (!demoMode || configuredId) throw new Error('This build uses its configured environment.')
   const value = id.trim()
-  if (!/^[A-Za-z0-9_-]{8,160}$/.test(value) || value.startsWith('ser.')) {
-    throw new Error('Enter the public client-side ID from Environment Settings.')
-  }
+  if (!/^[A-Za-z0-9_-]{8,160}$/.test(value)) throw new Error('Enter the public client-side ID from Environment Settings.')
   sessionStorage.setItem(sessionKey, value)
   location.reload()
 }
 
-function flushPage() {
+window.addEventListener('pagehide', () => {
   void liveClient.flush().catch(() => {})
   if (simulator) void simulator.flush().catch(() => {})
-}
-window.addEventListener('pagehide', flushPage)
+})
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') flushPage()
+  if (document.visibilityState === 'hidden') void liveClient.flush().catch(() => {})
 })

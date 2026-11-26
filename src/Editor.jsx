@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, FileText, Save } from 'lucide-react'
 
-export default function Editor({ draft, editing, onCancel, onSave, saving, error }) {
+import PromptFill from './PromptFill'
+
+export default function Editor({ draft, editing, onCancel, onSave, saving, error, copy }) {
   const [title, setTitle] = useState(draft.title)
   const [prompt, setPrompt] = useState(draft.prompt)
   const heading = useRef(null)
-  useEffect(() => { heading.current?.focus() }, [])
+  useEffect(() => { if (!draft.openInputs) heading.current?.focus() }, [draft.openInputs])
   return (
     <main id="main" className="page editor-page">
       <button type="button" className="back" onClick={onCancel} disabled={saving}><ChevronLeft size={17} />Workflow library</button>
@@ -29,6 +31,7 @@ export default function Editor({ draft, editing, onCancel, onSave, saving, error
         <div className="editor-actions"><button type="button" className="button secondary" onClick={onCancel} disabled={saving}>Cancel</button>
           <button type="submit" className="button primary" disabled={saving || !title.trim() || !prompt.trim()}><Save size={16} />{saving ? 'Saving.' : 'Save workflow'}</button></div>
       </form>
+      {editing && <PromptFill prompt={prompt} initiallyOpen={draft.openInputs} copy={copy} />}
     </main>
   )
 }

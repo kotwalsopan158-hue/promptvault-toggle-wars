@@ -1,4 +1,5 @@
 import { BookOpen, Braces, Copy, FileText, Folder, Layers3, Plus, Sparkles, SquarePen } from 'lucide-react'
+import { promptFields } from './prompt-inputs'
 import { GUIDED } from './experiment'
 
 function PaperStack() {
@@ -64,7 +65,9 @@ export default function Library({ items, variant, preview, create, edit, copy })
                 <span className="min-w-0"><strong>{item.title}</strong><span className="excerpt">{item.prompt.split('\n')[0]}</span></span>
               </button>
               <time dateTime={new Date(item.updated).toISOString()}>{dateFormat.format(item.updated)}</time>
-              <button type="button" onClick={() => copy(item.prompt)} className="icon-button" aria-label={'Copy prompt for ' + item.title}><Copy size={17} /></button>
+              {promptFields(item.prompt).length ? <button type="button" className="icon-button" onClick={() => edit(item, true)}
+                aria-label={'Fill inputs for ' + item.title}><Braces size={18} /></button>
+                : <button type="button" onClick={() => copy(item.prompt)} className="icon-button" aria-label={'Copy prompt for ' + item.title}><Copy size={17} /></button>}
             </li>)}
           </ul>
         ) : (

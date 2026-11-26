@@ -21,7 +21,7 @@ export async function boundedFetch(url, options = {}) {
   }
 }
 
-export function createExperimentClient(flagsmith, environmentID) {
+export function createExperimentClient(flagsmith, environmentID, options = {}) {
   let initialized = false
   let assignedId = null
   let sequence = Promise.resolve()
@@ -35,7 +35,13 @@ export function createExperimentClient(flagsmith, environmentID) {
       } else {
         await flagsmith.init({
           environmentID, identity: id, enableAnalytics: true, enableEvents: true,
-          cacheFlags: false, fetch: boundedFetch,
+          cacheFlags: false,
+          fetch: options.fetch || boundedFetch,
+          ...(options.api ? { api: options.api } : {}),
+          eventProcessorConfig: {
+            ...(options.eventsApiUrl ? { eventsApiUrl: options.eventsApiUrl } : {}),
+            ...(options.batchOnly ? { flushInterval: 0 } : {}),
+          },
         })
         initialized = true
       }
