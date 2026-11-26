@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Check, Database, Layers3, Monitor, X } from 'lucide-react'
-import '@fontsource-variable/dm-sans/latin.css'
+import '@fontsource-variable/dm-sans'
 import './styles.css'
 import Editor from './Editor'
 import Inspector from './Inspector'
@@ -64,7 +64,7 @@ function App() {
   useEffect(() => {
     if (!ready || !identity || !assignment.enrolled || items.length || draft || storageError || preview) return
     function seen() {
-      if (document.visibilityState !== 'visible' || exposure.current?.id === identity.id) return
+      if (document.visibilityState !== 'visible' || document.querySelector('dialog[open]') || exposure.current?.id === identity.id) return
       if (liveClient.expose(identity.id, assignment)) {
         exposure.current = { id: identity.id, assignment }
         setLastEvent('$flag_exposure')
@@ -74,7 +74,11 @@ function App() {
     }
     seen()
     document.addEventListener('visibilitychange', seen)
-    return () => document.removeEventListener('visibilitychange', seen)
+    document.addEventListener('close', seen, true)
+    return () => {
+      document.removeEventListener('visibilitychange', seen)
+      document.removeEventListener('close', seen, true)
+    }
   }, [ready, identity, assignment, items.length, draft, storageError, preview, notify])
 
   // Other tabs can save to the same visitor's library. The database owns first-save ordering.

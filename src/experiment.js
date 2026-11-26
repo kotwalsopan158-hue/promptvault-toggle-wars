@@ -99,9 +99,10 @@ export async function simulateVisitors(client, onProgress, newId, random = Math.
       stats.attempted++
       if (!client.expose(id, assignment)) {
         stats.skipped++
-        stats.error = assignment.reason || 'The exposure could not be verified.'
-        // A misconfigured or unreachable environment cannot yield useful demo events.
-        if (assignment.source === 'fallback' || !assignment.enrolled) break
+        if (assignment.source === 'fallback') {
+          stats.error = assignment.reason
+          break
+        }
       } else {
         const arm = stats.variants[assignment.variant]
         arm.exposures++
