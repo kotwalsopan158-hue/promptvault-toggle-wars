@@ -7,6 +7,7 @@ x-flagsmith: &flagsmith
     WAREHOUSE_CREDENTIALS_SECRET: ${PROMPTVAULT_WAREHOUSE_KEY}
     DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
     FLAGSMITH_DOMAIN: localhost:8000
+    API_URL: http://localhost:8000/api/v1/
     ENVIRONMENT: production
     EXPERIMENTATION_ENABLED: "true"
     USE_POSTGRES_FOR_ANALYTICS: "true"

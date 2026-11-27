@@ -72,7 +72,7 @@ try {
     await home(page)
     await button(page, 'Create workflow').waitFor()
   }, async page => {
-    await delay(2100)
+    await delay(4100)
     await button(page, 'Create workflow').click()
     assert.equal(await page.getByLabel('Workflow name').inputValue(), '')
     await delay(2100)
@@ -148,25 +148,53 @@ try {
     const { key } = await login.json()
     assert(key, 'Local dashboard did not return a session')
     await context.addCookies([{ name: 't', value: key, url: dashboard }])
-    await page.goto(dashboard + '/project/' + lab.project + '/environment/' + lab.environment + '/experiments/' + lab.experiment, { waitUntil: 'domcontentloaded' })
+    const detailUrl = dashboard + '/project/' + lab.project + '/environment/' + lab.environment + '/experiments/' + lab.experiment
+    await page.goto(detailUrl, { waitUntil: 'domcontentloaded' })
     try {
-      await page.getByRole('heading', { name: 'Analysis', exact: true }).waitFor({ timeout: 18000 })
-      await page.getByRole('columnheader', { name: 'Exposures' }).first().waitFor()
+      // A first dashboard visit can land on the organisation picker before the deep link is ready.
+      try {
+        await page.getByRole('heading', { name: 'Analysis', exact: true }).waitFor({ timeout: 9500 })
+      } catch {
+        await page.goto(detailUrl, { waitUntil: 'domcontentloaded' })
+        await page.getByRole('heading', { name: 'Analysis', exact: true }).waitFor({ timeout: 12000 })
+      }
+      await page.getByRole('columnheader', { name: 'Exposures' }).first().waitFor({ timeout: 6000 })
+      await page.getByRole('heading', { name: 'Results', exact: true }).scrollIntoViewIfNeeded()
     } catch {
-      // Some self-hosted builds serve only the API. Film the real results response in that case.
+      // Keep the live warehouse response readable when the dashboard frontend is unavailable.
       dashboardView = 'Flagsmith results API'
       const resultsUrl = dashboard + '/api/v1/environments/' + lab.environment + '/experiments/' + lab.experiment + '/results/?format=json'
-      await page.route(resultsUrl, route => route.continue({ headers: { ...route.request().headers(), Authorization: 'Token ' + key } }))
-      const response = await page.goto(resultsUrl)
+      const response = await context.request.get(resultsUrl, { headers: { Authorization: 'Token ' + key } })
       const data = await response.json()
-      assert(response.ok() && data.results?.payload?.metrics?.length, 'The recording requires measured warehouse results')
-      const pretty = page.getByRole('checkbox', { name: /Pretty-print/i })
-      if (await pretty.count()) await pretty.check()
+      const metric = data.results?.payload?.metrics?.find(row => row.metric_id === lab.metric)
+      assert(response.ok() && metric?.variants.control.n > 0 && metric?.variants.guided_templates.n > 0, 'Measured results are required')
+      await page.goto('about:blank')
+      await page.setContent(await readFile('demo/warehouse.html', 'utf8'))
+      await page.evaluate(({ result, metric }) => {
+        const put = (id, value) => { document.getElementById(id).textContent = value }
+        const percent = (fraction, signed = false) => new Intl.NumberFormat('en', {
+          style: 'percent', maximumFractionDigits: 1, signDisplay: signed ? 'exceptZero' : 'auto',
+        }).format(fraction)
+        put('timestamp', new Date(result.as_of).toISOString().replace('T', ' ').slice(0, 19) + ' UTC')
+        for (const arm of ['control', 'guided_templates']) {
+          const { n, sum } = metric.variants[arm]
+          put(arm + '-n', n)
+          put(arm + '-sum', sum)
+          put(arm + '-rate', percent(sum / n))
+        }
+        const inference = metric.inference?.guided_templates
+        if (inference && [inference.lift, inference.chance_to_win, inference.ci_low, inference.ci_high].every(Number.isFinite)) {
+          put('lift', percent(inference.lift, true))
+          put('chance', percent(inference.chance_to_win))
+          put('interval', percent(inference.ci_low, true) + ' to ' + percent(inference.ci_high, true))
+        }
+        put('source', JSON.stringify(result, null, 2))
+      }, { result: data.results, metric })
     }
   }, async page => {
     await delay(1500)
     if (dashboardView === 'Experiment dashboard') await page.getByRole('heading', { name: 'Analysis', exact: true }).scrollIntoViewIfNeeded()
-    else await page.keyboard.press('PageDown')
+    else await page.getByText('95% credible interval for lift', { exact: true }).scrollIntoViewIfNeeded()
     await delay(2300)
   })
   await record('evidence', saved, async page => {

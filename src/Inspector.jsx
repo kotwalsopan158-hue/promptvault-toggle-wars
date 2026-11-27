@@ -62,8 +62,9 @@ function Simulator({ busy, setBusy, notify }) {
 export default function Inspector({ identity, assignment, preview, setPreview, canPreview, newVisitor, canReset, notify, lastEvent }) {
   const dialog = useRef(null)
   const opener = useRef(null)
-  const [open, setOpen] = useState(false)
-  const [view, setView] = useState('visitor')
+  const showRecordedResult = demoMode && window.location.hash === '#results'
+  const [open, setOpen] = useState(showRecordedResult)
+  const [view, setView] = useState(showRecordedResult ? 'result' : 'visitor')
   const [busy, setBusy] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState('')

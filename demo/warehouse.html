@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PromptVault | Live warehouse readout</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f6f5fa; color: #242135; font: 18px/1.4 system-ui,sans-serif; }
+    header { padding: .8rem max(4vw,calc((100vw - 960px)/2)); background: #211a38; color: white; }
+    main { max-width: 960px; margin: 1rem auto; padding: 0 .8rem 1rem; }
+    h1 { font-size: 2.1rem; line-height: 1.1; letter-spacing: -.04em; margin: .75rem 0 .3rem; }
+    p { color: #564f64; margin: 0 0 1rem; }
+    time { font-variant-numeric: tabular-nums; }
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { text-align: right; padding: .55rem 1rem; border-bottom: 1px solid #ded9e6; }
+    th:first-child { text-align: left; }
+    thead { color: #564b6c; }
+    td, dd { font-variant-numeric: tabular-nums; }
+    dl { display: flex; flex-wrap: wrap; gap: 1px; background: #dbd4e5; margin: 1rem 0; border: 1px solid #dbd4e5; border-radius: .4rem; overflow: hidden; }
+    dl div { flex: 1 1 auto; background: #fff; padding: .7rem 1rem; }
+    dt, summary { color: #564b6c; }
+    dd { margin: .25rem 0 0; color: #4b3185; font-size: 1.4rem; font-weight: 700; }
+    pre { overflow: auto; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <header><strong>PromptVault</strong> &nbsp; / &nbsp; Self-hosted Flagsmith results API</header>
+  <main>
+    <h1>First workflow save rate</h1>
+    <p>Synthetic visitors in the filming environment · Last analysis <time id="timestamp"></time></p>
+    <table aria-label="Experiment results returned by Flagsmith">
+      <thead><tr><th scope="col">Variation</th><th scope="col">Exposed</th><th scope="col">First saves</th><th scope="col">Save rate</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Control</th><td id="control-n"></td><td id="control-sum"></td><td id="control-rate"></td></tr>
+        <tr><th scope="row">Guided template</th><td id="guided_templates-n"></td><td id="guided_templates-sum"></td><td id="guided_templates-rate"></td></tr>
+      </tbody>
+    </table>
+    <dl>
+      <div><dt>Relative lift</dt><dd id="lift">Collecting data</dd></div>
+      <div><dt>Probability guided beats control</dt><dd id="chance">Collecting data</dd></div>
+      <div><dt>95% credible interval for lift</dt><dd id="interval">Collecting data</dd></div>
+    </dl>
+    <details><summary>View the source response from Flagsmith</summary><pre id="source"></pre></details>
+  </main>
+</body>
+</html>

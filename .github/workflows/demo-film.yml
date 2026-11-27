@@ -1,6 +1,7 @@
 name: Record the working demo
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches: [main]
     paths:

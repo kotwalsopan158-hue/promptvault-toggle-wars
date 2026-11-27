@@ -2,7 +2,16 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { fillPrompt, promptFields } from '../src/prompt-inputs.js'
 import { createBatchReceipt } from '../src/receipts.js'
+import { markdownTemplate } from '../src/export-template.js'
 import { FLAG, EVENT } from '../src/experiment.js'
+
+test('Markdown export preserves fenced code and lists repeated inputs once', () => {
+  const prompt = 'Explain {{notes}}.\n````js\nconst x = 1\n````\nThen summarize {{notes}}.'
+  const output = markdownTemplate({ title: 'Release [A]', prompt })
+  assert(output.startsWith('# Release \\[A\\]'))
+  assert(output.includes('`````text\n' + prompt + '\n`````\n'))
+  assert.equal(output.split('- `notes`').length, 2)
+})
 
 test('one input fills every exact field and treats pasted notes as literal text', () => {
   const original = '{{ notes }} then {{notes}} for {{audience}} and {{constructor}}'

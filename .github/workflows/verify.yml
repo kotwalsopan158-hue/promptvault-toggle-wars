@@ -30,8 +30,12 @@ jobs:
           name: promptvault-complete-project
           path: release/
 
+  release-film:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'Release PromptVault v')
+    uses: ./.github/workflows/demo-film.yml
+
   release:
-    needs: verify
+    needs: [verify, release-film]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'Release PromptVault v')
     runs-on: ubuntu-24.04
     permissions:
@@ -44,11 +48,74 @@ jobs:
         with:
           name: promptvault-complete-project
           path: release
+      - uses: actions/download-artifact@v5
+        with:
+          name: promptvault-narrated-video
+          path: release/movie
       - name: Publish the verified app and complete source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="v$(node -p "require('./package.json').version")"
           gh release create "$tag" release/PromptVault.html release/PromptVault-full-source.md release/PromptVault-source.zip \
+            release/movie/PromptVault-demo.mp4 release/movie/PromptVault-captions.vtt \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "PromptVault $tag" \
-            --notes "Open PromptVault.html to try the app. The ZIP contains the full project, Flagsmith Cloud setup, measured synthetic results, and the two-minute demo script. The Markdown download contains every tracked file in full."
+            --notes "Try the [browser app](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/) or [watch the narrated demo](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/watch/). The ZIP contains the full project, Cloud setup and measured synthetic results. The Markdown download includes every tracked source file."
+
+  publish-pages:
+    needs: release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: gh-pages
+          path: site
+      - uses: actions/download-artifact@v5
+        with:
+          name: promptvault-complete-project
+          path: release
+      - uses: actions/download-artifact@v5
+        with:
+          name: promptvault-narrated-video
+          path: release/movie
+      - name: Publish the app and video player
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site/watch
+          cp release/PromptVault.html site/index.html
+          cp demo/watch.html site/watch/index.html
+          cp release/movie/PromptVault-{demo.mp4,captions.vtt,poster.jpg} site/watch/
+          git -C site config user.name "github-actions[bot]"
+          git -C site config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C site add -- index.html watch
+          if ! git -C site diff --cached --quiet; then
+            git -C site commit -m "Publish PromptVault app and recorded demo"
+            git -C site push origin HEAD:gh-pages
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --silent || echo 'Checking whether Pages has already scheduled a build.'
+          source_url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url)
+          site_url="${source_url%/}/"
+          echo "SITE_URL=$site_url" >> "$GITHUB_ENV"
+          for attempt in {1..40}; do
+            if curl -fsSL --max-time 15 "${site_url}watch/?build=$GITHUB_RUN_ID-$attempt" -o /tmp/promptvault-player.html && \
+               cmp -s /tmp/promptvault-player.html demo/watch.html && \
+               curl -fsSL --max-time 15 "${site_url}?build=$GITHUB_RUN_ID-$attempt" -o /tmp/promptvault-app.html && \
+               cmp -s /tmp/promptvault-app.html release/PromptVault.html; then exit 0; fi
+            sleep 8
+          done
+          echo 'The published files did not match the release in time.' >&2
+          exit 1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Play the public video in a signed-out browser
+        run: node demo/check-public.mjs "$SITE_URL"

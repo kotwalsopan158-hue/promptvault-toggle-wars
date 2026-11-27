@@ -160,4 +160,7 @@ test('recorded evidence works offline and identifies synthetic traffic and uncer
   await expect(page.getByRole('link', { name: 'Verify the warehouse run' })).toHaveAttribute('href', /actions\/runs\/45919688828$/)
   await page.getByRole('button', { name: 'Visitor & traffic' }).click()
   await expect(page.getByRole('button', { name: 'New Visitor Session' })).toBeVisible()
+  await page.goto('/#results')
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Did the guided start help?' })).toBeVisible()
 })

@@ -86,7 +86,7 @@ for entry in story:
     original = duration(source)
     offset = max(0, original - shot["seconds"])
     take = min(original - offset, length)
-    stretch = min(1.6, length / take)
+    stretch = min(3.3, length / take)
     ass = film / f"{key}.ass"
     events = []
     for begin, end, line in cues:
@@ -118,5 +118,7 @@ assert any(s["codec_name"] == "h264" and s["width"] == 1280 and s["height"] == 7
 assert any(s["codec_name"] == "aac" for s in streams)
 assert 55 < duration(movie) < 180
 run("ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(movie), "-f", "null", "-")
+run("ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", "0.7", "-i", str(movie),
+    "-frames:v", "1", "-q:v", "3", str(out / "PromptVault-poster.jpg"))
 print("VIDEO VERIFIED", json.dumps({"seconds": round(duration(movie), 2), "dashboard": capture["dashboardView"],
     "chapters": list(shots), "narration": "Piper LJ Speech" if voice else "eSpeak NG", "bytes": movie.stat().st_size}))
