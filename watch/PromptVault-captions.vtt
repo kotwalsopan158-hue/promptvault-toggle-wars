@@ -1,49 +1,61 @@
 WEBVTT
 
-00:00:00.180 --> 00:00:04.743
+00:00:00.180 --> 00:00:04.731
 Think of the last prompt you typed twice. PromptVault gives it a home.
 
-00:00:04.963 --> 00:00:11.070
-Can an editable decision brief help five more people in every hundred save their first workflow?
+00:00:04.951 --> 00:00:09.769
+Could an editable decision brief earn five more first saves per hundred visitors?
 
-00:00:11.290 --> 00:00:15.353
-Here is the control. A new visitor starts with two empty fields.
+00:00:09.989 --> 00:00:12.648
+This is control. The editor starts blank.
 
-00:00:16.020 --> 00:00:20.409
-Here is another visitor. Flagsmith assigned this one to guided templates.
+00:00:13.300 --> 00:00:16.470
+Flagsmith assigned this visitor to guided templates.
 
-00:00:20.629 --> 00:00:28.036
-Watch the end of the visitor ID. After the page refreshes, both the ID and the starting experience stay the same.
+00:00:16.690 --> 00:00:22.831
+Watch the visitor ID as I refresh. Same ID, same starting experience.
 
-00:00:28.700 --> 00:00:34.726
-The guided editor already has a decision brief. I can give it a name that fits my project.
+00:00:23.500 --> 00:00:26.577
+I'll name this decision brief and save it.
 
-00:00:34.946 --> 00:00:42.562
-Opening the editor earns nothing. The first successful save queues a conversion under the ID that saw the starting screen.
+00:00:26.797 --> 00:00:34.099
+The trace shows Flagsmith acknowledged the onboarding exposure and the first successful save under one visitor ID.
 
-00:00:43.220 --> 00:00:46.633
-Now I can fill the saved prompt with fresh release notes.
+00:00:34.780 --> 00:00:38.147
+I can use fresh release notes in my saved prompt.
 
-00:00:46.853 --> 00:00:54.667
-The Markdown export carries the reusable template and its input names. The notes I just entered stay in this browser.
+00:00:38.367 --> 00:00:43.208
+The Markdown export keeps the template and leaves these notes in my browser.
 
-00:00:55.340 --> 00:01:01.772
-For the demo, one click sends a hundred synthetic visitors through a separate Flagsmith client.
+00:00:43.860 --> 00:00:49.247
+In a second browser, a teammate can review and import that exact template.
 
-00:01:01.992 --> 00:01:07.994
-The simulator programs their chance of saving. Its receipt shows which events ingestion acknowledged.
+00:00:49.467 --> 00:00:53.345
+Import fills the draft. They still choose whether to save.
 
-00:01:08.660 --> 00:01:13.037
-These are results from the actual Flagsmith warehouse used for this recording.
+00:00:54.020 --> 00:00:58.652
+This demo sends a hundred synthetic visitors through a separate client.
 
-00:01:13.257 --> 00:01:22.243
-Look at the number of exposed visitors in each arm before reading the lift. The inspector also includes a dated result that anyone can verify.
+00:00:58.872 --> 00:01:03.458
+Their save probabilities are programmed. The receipt counts accepted events.
 
-00:01:22.900 --> 00:01:32.362
+00:01:04.140 --> 00:01:10.131
+To invite real people, I check a separate research environment and copy its participant link.
+
+00:01:10.351 --> 00:01:13.184
+They see the workspace without judge controls.
+
+00:01:13.860 --> 00:01:16.867
+Here are the filming environment's warehouse results.
+
+00:01:17.087 --> 00:01:23.879
+Read each arm's exposure count before the lift. The inspector also has a dated, verifiable run.
+
+00:01:24.540 --> 00:01:33.805
 In the recorded example, control saved 28 out of 145. Guided saved 41 out of 156.
 
-00:01:32.582 --> 00:01:38.584
+00:01:34.025 --> 00:01:39.876
 That is 36 percent relative lift, with an 89 percent chance of beating control.
 
-00:01:38.804 --> 00:01:49.091
+00:01:40.096 --> 00:01:50.104
 The interval stretches from 22 percent worse to 94 percent better. Every visitor was scripted. The measurement works. The human question stays open.
