@@ -1156,6 +1156,7 @@ input::placeholder,textarea::placeholder {
 .trace-list li { padding: 12px 0; border-top: 1px solid var(--line); }
 .trace-list li > div { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px; }
 .trace-list code { display: block; margin-top: 5px; font-size: .82rem; overflow-wrap: anywhere; }
+.trace-source { color: #50368c; text-decoration: underline; text-underline-offset: .15em; }
 .trace-state { border-radius: 5px; background: #f2eff6; color: #4e465d; padding: 2px 7px; font-size: .82rem; }
 .trace-state.state-acknowledged { color: #245338; background: #e4f2e9; }
 .trace-state.state-unconfirmed, .trace-state.state-rejected { color: #774714; background: #fcf0da; }

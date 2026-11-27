@@ -3,43 +3,57 @@
     "key": "blank",
     "lines": [
       "Think of the last prompt you typed twice. PromptVault gives it a home.",
-      "Can an editable decision brief help five more people in every hundred save their first workflow?",
-      "Here is the control. A new visitor starts with two empty fields."
+      "Could an editable decision brief earn five more first saves per hundred visitors?",
+      "This is control. The editor starts blank."
     ]
   },
   {
     "key": "identity",
     "lines": [
-      "Here is another visitor. Flagsmith assigned this one to guided templates.",
-      "Watch the end of the visitor ID. After the page refreshes, both the ID and the starting experience stay the same."
+      "Flagsmith assigned this visitor to guided templates.",
+      "Watch the visitor ID as I refresh. Same ID, same starting experience."
     ]
   },
   {
     "key": "save",
     "lines": [
-      "The guided editor already has a decision brief. I can give it a name that fits my project.",
-      "Opening the editor earns nothing. The first successful save queues a conversion under the ID that saw the starting screen."
+      "I'll name this decision brief and save it.",
+      "The trace shows Flagsmith acknowledged the onboarding exposure and the first successful save under one visitor ID."
     ]
   },
   {
     "key": "reuse",
     "lines": [
-      "Now I can fill the saved prompt with fresh release notes.",
-      "The Markdown export carries the reusable template and its input names. The notes I just entered stay in this browser."
+      "I can use fresh release notes in my saved prompt.",
+      "The Markdown export keeps the template and leaves these notes in my browser."
+    ]
+  },
+  {
+    "key": "handoff",
+    "lines": [
+      "In a second browser, a teammate can review and import that exact template.",
+      "Import fills the draft. They still choose whether to save."
     ]
   },
   {
     "key": "traffic",
     "lines": [
-      "For the demo, one click sends a hundred synthetic visitors through a separate Flagsmith client.",
-      "The simulator programs their chance of saving. Its receipt shows which events ingestion acknowledged."
+      "This demo sends a hundred synthetic visitors through a separate client.",
+      "Their save probabilities are programmed. The receipt counts accepted events."
+    ]
+  },
+  {
+    "key": "participants",
+    "lines": [
+      "To invite real people, I check a separate research environment and copy its participant link.",
+      "They see the workspace without judge controls."
     ]
   },
   {
     "key": "warehouse",
     "lines": [
-      "These are results from the actual Flagsmith warehouse used for this recording.",
-      "Look at the number of exposed visitors in each arm before reading the lift. The inspector also includes a dated result that anyone can verify."
+      "Here are the filming environment's warehouse results.",
+      "Read each arm's exposure count before the lift. The inspector also has a dated, verifiable run."
     ]
   },
   {

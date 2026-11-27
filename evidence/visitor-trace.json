@@ -1,0 +1,24 @@
+{
+  "source": "Scripted visitor in an isolated self-hosted Flagsmith experiment",
+  "ci_url": "https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/runs/46039120780",
+  "trace": {
+    "identifier": "pv_085f89f6744cc46296ab6c2e1faf5078",
+    "experiment_id": 1,
+    "flag": "onboarding_empty_state",
+    "variant": "guided_templates",
+    "events": {
+      "$flag_exposure": {
+        "queued_at": "2026-11-27T17:08:17.894Z",
+        "status": "acknowledged",
+        "response_at": "2026-11-27T17:08:17.912Z",
+        "http_status": 202
+      },
+      "first_workflow_created": {
+        "queued_at": "2026-11-27T17:08:18.122Z",
+        "status": "acknowledged",
+        "response_at": "2026-11-27T17:08:18.129Z",
+        "http_status": 202
+      }
+    }
+  }
+}

@@ -106,7 +106,12 @@ try {
     await button(page, 'Save workflow').click()
     await sent
     await page.getByText(/first_workflow_created queued/).waitFor()
-    await delay(1450)
+    await delay(950)
+    await inspect(page)
+    await button(page, 'Event trace').click()
+    await page.getByText('Acknowledged', { exact: true }).nth(1).waitFor()
+    await page.getByRole('link', { name: 'Download visitor trace' }).scrollIntoViewIfNeeded()
+    await delay(1800)
   })
   await record('reuse', saved, async page => {
     await home(page)
@@ -122,7 +127,21 @@ try {
     const exported = await download
     const text = await readFile(await exported.path(), 'utf8')
     assert(text.includes('{{notes}}') && !text.includes('One QA slot remains.'))
+    await exported.saveAs(output + '/release-handoff.md')
     await delay(900)
+  })
+  await record('handoff', emptyLibrary(ids.control), async page => {
+    await home(page)
+    await button(page, 'Create workflow').click()
+    await page.getByText('Import a template', { exact: true }).click()
+    await page.getByLabel('PromptVault Markdown file').setInputFiles(output + '/release-handoff.md')
+    await button(page, 'Use imported template').scrollIntoViewIfNeeded()
+  }, async page => {
+    await delay(2000)
+    await button(page, 'Use imported template').click()
+    assert.equal(await page.getByLabel('Workflow name').inputValue(), 'Release handoff')
+    assert((await page.getByLabel('Reusable prompt').inputValue()).includes('{{notes}}'))
+    await delay(1700)
   })
   await record('traffic', saved, async page => {
     await home(page)
@@ -140,6 +159,27 @@ try {
     await delay(1600)
   })
   let dashboardView = 'Experiment dashboard'
+  const participant = JSON.parse(await readFile('.promptvault-lab/participant.json', 'utf8'))
+  await record('participants', saved, async (page, context) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: app })
+    await home(page)
+    await inspect(page)
+    await button(page, 'Participant links').click()
+    await page.getByLabel('Public research environment ID').fill(participant.environment)
+  }, async page => {
+    await button(page, 'Check flag and create link').click()
+    const link = page.getByLabel('Participant link', { exact: true })
+    await link.waitFor()
+    await button(page, 'Copy participant link').click()
+    await page.getByText('Participant link copied.', { exact: true }).waitFor()
+    const invitation = await page.evaluate(() => navigator.clipboard.readText())
+    assert.equal(invitation, await link.inputValue())
+    await delay(1800)
+    await page.goto(invitation)
+    await page.getByRole('button', { name: /^(Create workflow|Use decision brief)$/ }).waitFor()
+    assert.equal(await button(page, 'Experiment inspector').count(), 0)
+    await delay(1600)
+  })
   await record('warehouse', undefined, async (page, context) => {
     const credentials = JSON.parse(await readFile('.promptvault-lab/credentials.json', 'utf8'))
     const login = await fetch(dashboard + '/api/v1/auth/login/', { method: 'POST',

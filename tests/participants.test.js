@@ -18,6 +18,7 @@ test('participant links carry only the research key and keep workspaces separate
   assert.notEqual(participant.identityKey, 'user_id')
   assert.equal(routingFor(root, 'demo', '', demoKey).identityKey, 'user_id')
   assert.equal(routingFor(root, 'demo', '', demoKey).environment, demoKey)
+  assert(routingFor(new URL('?study=' + demoKey, root).href, 'demo', '', demoKey).invalidLink)
   assert.equal(routingFor(url.href, 'research', 'pinned-research', demoKey).environment, 'pinned-research')
   assert.throws(() => participantUrl(root, demoKey, demoKey), /separate/)
   assert.throws(() => participantUrl(root, 'ser.' + studyKey, demoKey), /client-side/)

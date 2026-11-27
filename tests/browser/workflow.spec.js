@@ -169,6 +169,18 @@ test('recorded evidence works offline and identifies synthetic traffic and uncer
   await expect(page.getByRole('heading', { name: 'Did the guided start help?' })).toBeVisible()
 })
 
+test('public trace shows a verified scripted example without a demo key', async ({ page }) => {
+  await page.goto('/#trace')
+  await expect(page.getByText(/Recorded example/)).toBeVisible()
+  await expect(page.getByText('Acknowledged', { exact: true })).toHaveCount(2)
+  const link = page.getByRole('link', { name: 'Download recorded trace' })
+  const uri = await link.getAttribute('href')
+  const receipt = JSON.parse(decodeURIComponent(uri.slice(uri.indexOf(',') + 1)))
+  expect(receipt.source).toContain('Scripted')
+  expect(receipt.trace.events.first_workflow_created.http_status).toBe(202)
+  await expect(page.getByRole('link', { name: 'Verify the recorded trace' })).toHaveAttribute('href', receipt.ci_url)
+})
+
 test('an invitation enrolls in the research environment and leaves the demo library and ID alone', async ({ page }) => {
   const key = 'R'.repeat(22)
   const events = await mockCloud(page, () => 'guided_templates')

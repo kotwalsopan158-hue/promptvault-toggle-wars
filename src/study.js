@@ -12,7 +12,7 @@ export function routingFor(href, buildMode, configuredId, demoOverride) {
     return { demo: true, environment: configuredId || demoOverride, identityKey: 'user_id' }
   }
   const keys = params.getAll('study')
-  const valid = keys.length === 1 && clientKey.test(keys[0]) && keys[0] !== configuredId
+  const valid = keys.length === 1 && clientKey.test(keys[0]) && keys[0] !== configuredId && keys[0] !== demoOverride
   return {
     demo: false,
     environment: valid ? keys[0] : '',
