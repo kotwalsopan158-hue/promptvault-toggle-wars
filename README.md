@@ -7,7 +7,7 @@ A two-screen library for prompts worth using twice. Save a workflow, reopen it, 
 
 The public app opens in local preview. Choose **Experiment inspector** and **Guided template** to try the second experience, or enter a public demo environment ID in the inspector to send live events. The video follows real SDK traffic to a self-hosted Flagsmith warehouse. The app, recording and recorded result are open to visitors without signing in.
 
-The release includes a standalone HTML app, a ZIP of the project, every source file in one Markdown download, the narrated MP4 and English captions. [Download v1.1.0](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/releases/tag/v1.1.0) · [Demo script](DEMO.md) · [Build and browser checks](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/verify.yml)
+The release includes a standalone HTML app, a ZIP of the project, every source file in one Markdown download, the narrated MP4 and English captions. [Download v1.2.0](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/releases/tag/v1.2.0) · [Demo script](DEMO.md) · [Build and browser checks](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/verify.yml)
 
 ## Experiment design
 
@@ -45,6 +45,8 @@ Open the local address printed by Vite. Without a key, control works immediately
 
 **Take a template with you.** Open a saved workflow and choose **Export saved template (.md)**. The download contains its last saved title, editable prompt and input names. For example, a colleague receives the literal `{{notes}}` field. Your filled-in meeting notes stay in the browser. Reusing and exporting are available to both arms and do not trigger the first-save metric.
 
+**Try the handoff in a second browser.** Open the assigned editor and expand **Import a template**. Choose the exported Markdown file, preview its prompt and inputs, then choose **Use imported template** to fill the two draft fields. You can cancel the import or edit the draft. The browser stores the workflow and evaluates the conversion only when you press **Save workflow**. Both arms use this same import flow.
+
 ### Connect a Cloud environment
 
 Copy `.env.example` to `.env.local`. Use `Copy-Item .env.example .env.local` in PowerShell or `cp .env.example .env.local` on macOS or Linux. Set the values below and restart Vite.
@@ -69,6 +71,8 @@ The first run pulls Flagsmith and PostgreSQL, configures the warehouse, creates 
 
 The lab binds to loopback and uses the open-source PostgreSQL warehouse option intended for evaluation. The Cloud setup below is the path for a public human experiment. [Flagsmith self-hosted experimentation](https://docs.flagsmith.com/experimentation/self-hosting)
 
+The lab also creates **Participant rehearsal**, with a separate environment key, metric and experiment. The terminal prints a participant URL for the local app. Automated checks run the participant code path there with one scripted visitor. These checks do not provide human study data.
+
 ## Flagsmith Cloud setup
 
 1. Create or select a Flagsmith project and select its **Demo** environment. You can dedicate the existing **Development** environment to the demo. Under **Environment Settings**, copy its **client-side environment key**.
@@ -82,13 +86,20 @@ The lab binds to loopback and uses the open-source PostgreSQL warehouse option i
 9. Open PromptVault and confirm **Live · Flagsmith**, **Enrolled**, the ID and arm in the inspector. Close it to expose the library card. Refresh before saving and check that the ID and arm match. Save a workflow, verify the conversion toast, then open the experiment in Flagsmith.
 10. After ingestion, click **Refresh results**. Check **As of**, exposed counts, conversion rate, **Delta**, **Win Probability** and **Credible Interval (95%)** for each arm. Result refresh is limited to once every five minutes. [Reading results](https://docs.flagsmith.com/experimentation/analyse-an-experiment)
 
-For a human study, select a **different environment**, enable its warehouse, verify the project-level flag configuration, and create the metric and experiment there. Deploy with its key and `VITE_TRAFFIC_MODE=research`. This disables visitor resets, offline arm overrides and the simulator. Keep all rehearsals on the demo configuration.
+### Invite participants to a human study
+
+1. In a **separate research environment**, repeat the warehouse, metric and experiment setup above. Confirm **Running** and record the planned 72-hour start and cutoff.
+2. Open **Participant links** in the public app. Enter the **public client-side ID** from the research environment, then choose **Check flag and create link**. The check reads the flag without creating an identity or sending an exposure. [Open the link builder](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#participants)
+3. Copy the generated URL and give the same link to participants. It contains only the app address and public research environment ID. Each browser creates its own stable participant ID. The study opens the normal workspace and hides the inspector, arm previews, reset and simulator.
+4. Read the **research** experiment in Flagsmith. A person who tried the demo on the same browser receives a separate research library and stable ID. A malformed study link opens a local workspace with tracking paused. A dedicated deployment can still use `VITE_TRAFFIC_MODE=research` with its build-time public key.
+
+Creating or copying a link sends no invitation. The flag check verifies that the feature exists, is enabled and has a supported base value. Experiment status, warehouse health and the metric are visible in Flagsmith.
 
 ## How the experiment works
 
 | Moment | Behavior |
 | --- | --- |
-| First visit | Creates a random `pv_` ID and persists it under `localStorage.user_id`. The same origin and browser profile reuse that ID after refresh. |
+| First visit | Creates a random `pv_` ID and persists it under `localStorage.user_id` in the regular workspace. A participant URL uses `promptvault.study.<environment>.user_id` on the same origin. Reopening that URL retains the participant ID and private library. |
 | Evaluation | Initializes with the visitor ID, `enableAnalytics: true` and `enableEvents: true`. A new judge identity calls `identify` on the active client. A fresh server response and `getValue` determine the arm. |
 | Exposure | After a real empty-state card is rendered in a visible tab, `getExperimentFlag` records `$flag_exposure` for an enrolled identity. A covered card waits until the inspector closes. Opening a populated library produces no onboarding exposure. |
 | Conversion | An IndexedDB transaction checks the owner’s record count and commits the workflow. Only a successful first write under an exposed identity calls `trackEvent('first_workflow_created', { identifier, metadata })`. Simultaneous saves in different tabs produce one first save. |
@@ -102,6 +113,10 @@ Browser profiles and devices have independent identities. Clearing site data rem
 **New Visitor Session** creates a new ID and opens that visitor’s library. Consecutive visitors may legitimately get the same arm. **Simulate 100 Visitors** uses a separate SDK client and 100 distinct IDs, one identity evaluation at a time. Flagsmith assigns the actual arm. The runner samples one possible save at **16% for control** or **29% for guided templates**. It calls `flushEvents()` even after a partial run.
 
 The inspector shows per-arm queued exposures and saves, skipped visitors, and the number of distinct identities acknowledged by the ingestion endpoint. It excludes individually rejected events from its receipt and displays **Delivery incomplete** when the totals differ. **Download run receipt** saves those counts, the experiment ID, timestamps and programmed rates as JSON. A 2xx ingestion response still precedes warehouse analysis. Only human traffic in the research environment measures the product hypothesis.
+
+**Event trace** follows one demo visitor from the visible onboarding card to the first successful save. It shows the visitor ID, assignment, queue times, and the individual outcome Flagsmith returned for each event. A retry can confirm an earlier failed attempt. An ambiguous or empty response stays **Unconfirmed**. The trace survives refresh in the same tab, excludes simulator identities and omits workflow text. Download the JSON to inspect it. [Open the event trace](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#trace)
+
+Without a live enrollment, **Event trace** opens a labeled example from a scripted visitor on 27 November 2026. Its two HTTP 202 acknowledgments came from a real Flagsmith server. The same verification run opened a participant link in a separate experiment, refreshed, and saved. That warehouse counted one exposed visitor and one first save. Both observations are automated rehearsals. [Trace JSON](evidence/visitor-trace.json) · [Warehouse verification](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/runs/46039120780)
 
 Choose **Recorded result** to inspect the dated warehouse snapshot alongside the running visitor session. It shows saves over exposures, relative lift, win probability, and a 95% credible interval drawn across a zero line. **Verify the warehouse run** opens the run behind those numbers. The snapshot stays fixed while you run fresh batches. [Open the result directly](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#results)
 
@@ -145,7 +160,7 @@ npm run test:e2e
 npm run preview
 ```
 
-The unit tests cover attribution, atomic first saves, retries, literal prompt substitution and receipt deduplication. The browser suite runs the production build, intercepts HTTP from the actual SDK and checks both variants, refresh, save, edit, offline mobile use and simulator isolation. Run this suite with the build-time environment ID blank and demo mode enabled.
+The unit tests cover attribution, atomic first saves, retries, Markdown round trips and event acknowledgments. The browser suite runs the production build, intercepts HTTP from the actual SDK and checks both variants, repeated saves, participant isolation, a partially rejected batch, offline mobile use and a template handoff between browser profiles. Run this suite with the build-time environment ID blank and demo mode enabled.
 
 A separate [warehouse verification job](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/flagsmith-lab.yml) starts the real local stack, runs a scripted save and three 100-visitor batches through the app, and checks Flagsmith’s returned occurrence totals against accepted events. The job uses an isolated database and never touches Cloud.
 
@@ -159,7 +174,9 @@ The recording workflow starts its own Flagsmith warehouse, finds two real assign
 | `src/experiment.js`, `src/runtime.js`, `src/receipts.js` | SDK lifecycle, enrollment checks, event delivery, traffic isolation and receipts |
 | `src/Library.jsx`, `src/Editor.jsx`, `src/PromptFill.jsx` | Library, shared editor and local reusable inputs |
 | `src/Inspector.jsx`, `src/RecordedResult.jsx` | Assignment, simulator receipts and the recorded warehouse result |
-| `src/export-template.js` | Local Markdown export of the saved prompt and its input names |
+| `src/visitor-trace.js`, `src/TracePanel.jsx` | Current visitor's joined events and per-event delivery outcomes |
+| `src/study.js`, `src/StudyLinks.jsx` | Participant URLs, research environment checks and isolated identities |
+| `src/export-template.js`, `src/ImportTemplate.jsx` | Local Markdown export, file validation and import preview |
 | `lab/` | Local Flagsmith server setup and real warehouse verification |
 | `demo/` | Public player, recording script, narration, captions renderer and public playback check |
 | `tests/` | Unit and production-browser tests |
