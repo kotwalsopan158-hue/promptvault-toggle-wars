@@ -1,0 +1,49 @@
+WEBVTT
+
+00:00:00.180 --> 00:00:04.743
+Think of the last prompt you typed twice. PromptVault gives it a home.
+
+00:00:04.963 --> 00:00:11.070
+Can an editable decision brief help five more people in every hundred save their first workflow?
+
+00:00:11.290 --> 00:00:15.353
+Here is the control. A new visitor starts with two empty fields.
+
+00:00:16.020 --> 00:00:20.409
+Here is another visitor. Flagsmith assigned this one to guided templates.
+
+00:00:20.629 --> 00:00:28.036
+Watch the end of the visitor ID. After the page refreshes, both the ID and the starting experience stay the same.
+
+00:00:28.700 --> 00:00:34.726
+The guided editor already has a decision brief. I can give it a name that fits my project.
+
+00:00:34.946 --> 00:00:42.562
+Opening the editor earns nothing. The first successful save queues a conversion under the ID that saw the starting screen.
+
+00:00:43.220 --> 00:00:46.633
+Now I can fill the saved prompt with fresh release notes.
+
+00:00:46.853 --> 00:00:54.667
+The Markdown export carries the reusable template and its input names. The notes I just entered stay in this browser.
+
+00:00:55.340 --> 00:01:01.772
+For the demo, one click sends a hundred synthetic visitors through a separate Flagsmith client.
+
+00:01:01.992 --> 00:01:07.994
+The simulator programs their chance of saving. Its receipt shows which events ingestion acknowledged.
+
+00:01:08.660 --> 00:01:13.037
+These are results from the actual Flagsmith warehouse used for this recording.
+
+00:01:13.257 --> 00:01:22.243
+Look at the number of exposed visitors in each arm before reading the lift. The inspector also includes a dated result that anyone can verify.
+
+00:01:22.900 --> 00:01:32.362
+In the recorded example, control saved 28 out of 145. Guided saved 41 out of 156.
+
+00:01:32.582 --> 00:01:38.584
+That is 36 percent relative lift, with an 89 percent chance of beating control.
+
+00:01:38.804 --> 00:01:49.091
+The interval stretches from 22 percent worse to 94 percent better. Every visitor was scripted. The measurement works. The human question stays open.

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Watch PromptVault test blank and guided onboarding in a working Flagsmith experiment.">
+  <meta property="og:title" content="PromptVault | Onboarding experiment demo">
+  <meta property="og:description" content="Two onboarding experiences, one first-save metric and a real Flagsmith warehouse.">
+  <meta property="og:image" content="https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/watch/PromptVault-poster.jpg">
+  <meta name="theme-color" content="#181425">
+  <title>PromptVault | Onboarding experiment demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #f4f0ff; background: #181425; font: 1rem/1.55 system-ui,sans-serif; }
+    main { width: min(100% - 2rem, 65rem); margin: clamp(1rem,4vw,3.5rem) auto; }
+    header, nav { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.4rem; }
+    header { justify-content: space-between; border-bottom: 1px solid #42384e; padding: 0 0 .9rem; }
+    header strong { font-size: 1.2rem; letter-spacing: -.03em; }
+    h1 { margin: 1.25rem 0 .8rem; font-size: clamp(1.65rem,4.5vw,2.65rem); line-height: 1.12; letter-spacing: -.04em; }
+    a { color: #d7c3ff; text-underline-offset: .22em; }
+    a:focus-visible { outline: 3px solid #dfd0ff; outline-offset: 5px; }
+    video { display: block; width: 100%; aspect-ratio: 16/9; background: #0d0a11; border: 1px solid #51485d; border-radius: .7rem; }
+    p { color: #e0d9eb; max-width: 65ch; margin: 1rem 0 .75rem; }
+    nav { font-size: .94rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><strong>PromptVault</strong><a href="../">Open the app</a></header>
+    <h1>Onboarding experiment demo</h1>
+    <video controls playsinline preload="metadata" poster="PromptVault-poster.jpg" aria-label="Narrated and captioned PromptVault demonstration">
+      <source src="PromptVault-demo.mp4" type="video/mp4">
+      Your browser can download the recording below.
+    </video>
+    <p>Watch a first save appear under the visitor who saw the onboarding card. The recording uses synthetic visitors and a self-hosted Flagsmith experiment.</p>
+    <nav aria-label="Demo resources">
+      <a href="../#results">Inspect the recorded result</a>
+      <a href="PromptVault-demo.mp4" download>Download the video</a>
+      <a href="PromptVault-captions.vtt" download>English captions</a>
+      <a href="https://github.com/kotwalsopan158-hue/promptvault-toggle-wars">Source code</a>
+    </nav>
+  </main>
+</body>
+</html>
