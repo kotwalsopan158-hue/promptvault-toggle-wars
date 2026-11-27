@@ -3,9 +3,11 @@
 A two-screen library for prompts worth using twice. Save a workflow, reopen it, and fill in its variables for the next task. Your prompts and the text you paste into them stay in your browser.
 
 **Toggle Wars · Track 01 · Test Something Real**  
-[Source repository](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars) · [Two-minute demo script](DEMO.md) · [Build and browser checks](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/verify.yml)
+[Try PromptVault](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/) · [Watch the captioned demo](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/watch/) · [Inspect the recorded experiment](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#results)
 
-**Try it without installing anything.** Download `PromptVault.html` and open it in a modern browser. Both onboarding variants can be previewed offline. The release also includes a ZIP and a single Markdown file containing every tracked source file. [Download the app and source](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/releases/tag/v1.0.0)
+The public app opens in local preview. Choose **Experiment inspector** and **Guided template** to try the second experience, or enter a public demo environment ID in the inspector to send live events. The video follows real SDK traffic to a self-hosted Flagsmith warehouse. The app, recording and recorded result are open to visitors without signing in.
+
+The release includes a standalone HTML app, a ZIP of the project, every source file in one Markdown download, the narrated MP4 and English captions. [Download v1.1.0](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/releases/tag/v1.1.0) · [Demo script](DEMO.md) · [Build and browser checks](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/verify.yml)
 
 ## Experiment design
 
@@ -40,6 +42,8 @@ npm run dev
 Open the local address printed by Vite. Without a key, control works immediately. Open **Experiment inspector → Offline variant preview → Guided template** to try the treatment in an empty library. A local preview sends no experiment events.
 
 **Use a saved workflow.** Give a prompt a field such as `{{notes}}` or `{{audience}}`. Save it, then choose the braces button in the library. Enter the values and click **Copy finished prompt**. Repeated fields take the same value. Input text is transient and the saved template stays reusable. Plain prompts can be copied directly from the library.
+
+**Take a template with you.** Open a saved workflow and choose **Export saved template (.md)**. The download contains its last saved title, editable prompt and input names. For example, a colleague receives the literal `{{notes}}` field. Your filled-in meeting notes stay in the browser. Reusing and exporting are available to both arms and do not trigger the first-save metric.
 
 ### Connect a Cloud environment
 
@@ -99,6 +103,8 @@ Browser profiles and devices have independent identities. Clearing site data rem
 
 The inspector shows per-arm queued exposures and saves, skipped visitors, and the number of distinct identities acknowledged by the ingestion endpoint. It excludes individually rejected events from its receipt and displays **Delivery incomplete** when the totals differ. **Download run receipt** saves those counts, the experiment ID, timestamps and programmed rates as JSON. A 2xx ingestion response still precedes warehouse analysis. Only human traffic in the research environment measures the product hypothesis.
 
+Choose **Recorded result** to inspect the dated warehouse snapshot alongside the running visitor session. It shows saves over exposures, relative lift, win probability, and a 95% credible interval drawn across a zero line. **Verify the warehouse run** opens the run behind those numbers. The snapshot stays fixed while you run fresh batches. [Open the result directly](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#results)
+
 ## Experiment results
 
 ### Verified synthetic run
@@ -143,6 +149,8 @@ The unit tests cover attribution, atomic first saves, retries, literal prompt su
 
 A separate [warehouse verification job](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/flagsmith-lab.yml) starts the real local stack, runs a scripted save and three 100-visitor batches through the app, and checks Flagsmith’s returned occurrence totals against accepted events. The job uses an isolated database and never touches Cloud.
 
+The recording workflow starts its own Flagsmith warehouse, finds two real assignments, films a save and a separate simulator batch, and checks that the downloaded Markdown omits the filled notes. It retrieves this run's results from Flagsmith before showing the dated snapshot. The renderer adds synchronized narration and captions, then decodes the finished MP4 to verify it. The release workflow also opens the deployed app, follows the evidence link and plays the video in a signed-out browser. [Recording workflow](.github/workflows/demo-film.yml) · [Spoken transcript](demo/narration.json)
+
 ## Source map
 
 | Location | Responsibility |
@@ -150,7 +158,9 @@ A separate [warehouse verification job](https://github.com/kotwalsopan158-hue/pr
 | `src/main.jsx`, `src/workspace.js` | Two-screen flow, visibility gate, persistent identity and atomic workflow saves |
 | `src/experiment.js`, `src/runtime.js`, `src/receipts.js` | SDK lifecycle, enrollment checks, event delivery, traffic isolation and receipts |
 | `src/Library.jsx`, `src/Editor.jsx`, `src/PromptFill.jsx` | Library, shared editor and local reusable inputs |
-| `src/Inspector.jsx` | Assignment, source, judge tools, simulator progress and export |
+| `src/Inspector.jsx`, `src/RecordedResult.jsx` | Assignment, simulator receipts and the recorded warehouse result |
+| `src/export-template.js` | Local Markdown export of the saved prompt and its input names |
 | `lab/` | Local Flagsmith server setup and real warehouse verification |
+| `demo/` | Public player, recording script, narration, captions renderer and public playback check |
 | `tests/` | Unit and production-browser tests |
 | `DEMO.md` | A timed script for a two-minute recording |

@@ -1,6 +1,8 @@
 # PromptVault · Two-minute demo script
 
-Use two browser profiles with empty libraries in different live arms. Keep the inspector closed when showing an onboarding card. Prepare the experiment dashboard and the [recorded synthetic result](evidence/synthetic-flagsmith.json) in separate tabs. The numbers below come from the linked snapshot. Show that snapshot when quoting them, or read the figures from your own dashboard if they differ.
+The published recording shows two live Flagsmith assignments, a real first save, local template export and an acknowledged 100-visitor simulation. It ends on the recorded experiment and its credible interval. [Watch the narrated demo](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/watch/) · [Read the exact narration](demo/narration.json)
+
+For a live presentation, use two browser profiles with empty libraries in different live arms. Keep the inspector closed when showing an onboarding card. Prepare the experiment dashboard and the recorded synthetic result in separate tabs. Show the snapshot when quoting the numbers below, or read the figures from your own dashboard. The recording can display the current warehouse results through the Flagsmith results API when the dashboard frontend is unavailable. [Recorded result](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#results) · [Source data](evidence/synthetic-flagsmith.json)
 
 | Time | Show | Say |
 | --- | --- | --- |
