@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, Download, FileText, Save } from 'lucide-react'
 
 import PromptFill from './PromptFill'
+import ImportTemplate from './ImportTemplate'
 import { downloadTemplate } from './export-template.js'
 
 export default function Editor({ draft, editing, onCancel, onSave, saving, error, copy }) {
@@ -32,6 +33,10 @@ export default function Editor({ draft, editing, onCancel, onSave, saving, error
         <div className="editor-actions"><button type="button" className="button secondary" onClick={onCancel} disabled={saving}>Cancel</button>
           <button type="submit" className="button primary" disabled={saving || !title.trim() || !prompt.trim()}><Save size={16} />{saving ? 'Saving.' : 'Save workflow'}</button></div>
       </form>
+      {!editing && <ImportTemplate onApply={template => {
+        setTitle(template.title); setPrompt(template.prompt)
+        document.getElementById('workflow-title')?.focus()
+      }} />}
       {editing && <>
         <PromptFill prompt={prompt} initiallyOpen={draft.openInputs} copy={copy} />
         <button type="button" className="button secondary export-saved" onClick={() => downloadTemplate(draft)}>

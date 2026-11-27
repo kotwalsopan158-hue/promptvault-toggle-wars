@@ -1,10 +1,11 @@
 import flagsmith, { createFlagsmithInstance } from '@flagsmith/flagsmith'
 import { boundedFetch, createExperimentClient, simulateVisitors } from './experiment.js'
 import { createBatchReceipt } from './receipts.js'
+import { participantUrl, routingFor, verifyStudyFlag } from './study.js'
+import { createVisitorTrace } from './visitor-trace.js'
 import { visitorId } from './workspace.js'
 
 const variables = import.meta.env
-export const demoMode = (variables.VITE_TRAFFIC_MODE || 'demo') === 'demo'
 export const configuredId = (variables.VITE_FLAGSMITH_ENV_ID || '').trim()
 const sessionKey = 'promptvault.demo.environment'
 
@@ -14,22 +15,40 @@ function demoOverride() {
 
 let activeBatch = null
 let simulator
-export const environmentID = configuredId || (demoMode ? demoOverride() : '')
+const route = routingFor(location.href, variables.VITE_TRAFFIC_MODE || 'demo', configuredId, demoOverride())
+export const { demo: demoMode, environment: environmentID, identityKey, invalidLink } = route
+let tabStorage
+try { tabStorage = window.sessionStorage } catch { /* Use memory if storage is blocked. */ }
+export const visitorTrace = createVisitorTrace(tabStorage)
+
+export async function makeParticipantLink(input) {
+  if (!demoMode) throw Error('Open the demo workspace to prepare a study link.')
+  const link = participantUrl(location.href, input, environmentID)
+  const api = variables.VITE_FLAGSMITH_API_URL || 'https://edge.api.flagsmith.com/api/v1/'
+  await verifyStudyFlag(link.searchParams.get('study'), api, boundedFetch)
+  return link.href
+}
 
 // Both SDK instances use the same transport. Only event batches acknowledged by HTTP
 // and carrying this run's unique prefix contribute to the optional simulator receipt.
 async function deliveryFetch(url, options) {
-  const response = await boundedFetch(url, options)
-  if (options?.method === 'POST' && /\/v1\/events\/?$/.test(String(url))) {
-    // The SDK reads only the event HTTP status. Drain the response to release
-    // the connection and check whether this batch was partially accepted.
-    const body = await response.text()
-    if (activeBatch && response.ok) {
-      try {
-        activeBatch.accept(JSON.parse(options.body).events, body ? JSON.parse(body) : undefined)
-      } catch { /* Unreadable acknowledgments cannot substantiate a receipt. */ }
-    }
+  if (options?.method !== 'POST' || !/\/v1\/events\/?$/.test(String(url))) return boundedFetch(url, options)
+  let events
+  try { events = JSON.parse(options.body).events } catch { /* Preserve the SDK request even when the observer cannot read it. */ }
+  if (!Array.isArray(events)) return boundedFetch(url, options)
+  let response
+  try { response = await boundedFetch(url, options) }
+  catch (error) {
+    visitorTrace.delivery(events, 0, null)
+    throw error
   }
+  let acknowledgement
+  try {
+    const raw = await response.clone().text()
+    acknowledgement = raw.trim() ? JSON.parse(raw) : undefined
+  } catch { acknowledgement = null }
+  if (activeBatch && response.ok) activeBatch.accept(events, acknowledgement)
+  visitorTrace.delivery(events, response.status, acknowledgement)
   return response
 }
 

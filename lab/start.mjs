@@ -37,6 +37,7 @@ if (stopping) {
   compose('up', '-d')
   await waitForApi()
   const lab = await ensureExperiment(state)
+  const participant = await ensureExperiment(state, 'Participant rehearsal')
   const browser = {
     VITE_FLAGSMITH_ENV_ID: lab.environment,
     VITE_TRAFFIC_MODE: 'demo',
@@ -45,10 +46,12 @@ if (stopping) {
   }
   writeFileSync(stateDir + '/browser.env', Object.entries(browser).map(([k, v]) => k + '=' + v).join('\n') + '\n')
   writeFileSync(stateDir + '/experiment.json', JSON.stringify(lab, null, 2))
+  writeFileSync(stateDir + '/participant.json', JSON.stringify(participant, null, 2))
   chmodSync(stateFile, 0o600)
   console.log('Flagsmith is running at http://localhost:8000. Local dashboard login details are in ' + stateFile + '.')
   if (!process.argv.includes('--prepare')) {
     console.log('Open http://localhost:5173 for PromptVault. The demo environment allows synthetic traffic.')
+    console.log('Open http://localhost:5173/?study=' + participant.environment + ' for the isolated participant rehearsal.')
     await delay(30)
     const child = spawnSync(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5173', '--strictPort'], {
       stdio: 'inherit', env: { ...process.env, ...browser },

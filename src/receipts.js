@@ -1,5 +1,16 @@
 import { CONTROL, EVENT, FLAG, GUIDED, SIMULATED_RATES } from './experiment.js'
 
+export function rejectedEventIndexes(events, acknowledgement) {
+  if (acknowledgement === undefined) return new Set()
+  if (!Number.isInteger(acknowledgement?.accepted) || acknowledgement.accepted < 0
+      || !Array.isArray(acknowledgement.rejected)) return null
+  const indexes = acknowledgement.rejected.map(row => row?.index)
+  const rejected = new Set(indexes)
+  if (indexes.length !== rejected.size || rejected.size + acknowledgement.accepted !== events.length
+      || indexes.some(index => !Number.isInteger(index) || index < 0 || index >= events.length)) return null
+  return rejected
+}
+
 export function createBatchReceipt(runId, startedAt = new Date().toISOString()) {
   const prefix = 'sim_' + runId + '_'
   let ordinal = 0
@@ -10,11 +21,8 @@ export function createBatchReceipt(runId, startedAt = new Date().toISOString()) 
   return {
     nextId() { ordinal++; return prefix + ordinal.toString(36) },
     accept(events, acknowledgment) {
-      if (acknowledgment !== undefined && (!Number.isInteger(acknowledgment?.accepted)
-        || !Array.isArray(acknowledgment.rejected))) return
-      const rejected = new Set(acknowledgment?.rejected.map(row => row.index))
-      if (acknowledgment && (rejected.size + acknowledgment.accepted !== events.length
-        || [...rejected].some(index => !Number.isInteger(index) || index < 0 || index >= events.length))) return
+      const rejected = rejectedEventIndexes(events, acknowledgment)
+      if (!rejected) return
       for (const [index, e] of events.entries()) {
         if (rejected.has(index)) continue
         if (typeof e.identifier !== 'string' || !e.identifier.startsWith(prefix)) continue

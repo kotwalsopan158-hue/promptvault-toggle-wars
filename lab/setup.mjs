@@ -46,7 +46,7 @@ export async function managementClient(credentials) {
   return client(login.key)
 }
 
-export async function ensureExperiment(credentials) {
+export async function ensureExperiment(credentials, environmentName = 'Demo') {
   const api = await managementClient(credentials)
   async function ensure(path, match, body) {
     const response = await api(path)
@@ -56,7 +56,7 @@ export async function ensureExperiment(credentials) {
   const named = name => resource => resource.name === name
   const org = await ensure('organisations/', named('PromptVault Lab'), { name: 'PromptVault Lab' })
   const project = await ensure('projects/', named('PromptVault'), { name: 'PromptVault', organisation: org.id })
-  const env = await ensure('environments/?project=' + project.id, named('Demo'), { name: 'Demo', project: project.id })
+  const env = await ensure('environments/?project=' + project.id, named(environmentName), { name: environmentName, project: project.id })
   const scope = 'environments/' + env.api_key + '/'
   await ensure(scope + 'warehouse-connections/', item => item.warehouse_type === 'postgres',
     { warehouse_type: 'postgres', config: { source: 'flagsmith_database' } })

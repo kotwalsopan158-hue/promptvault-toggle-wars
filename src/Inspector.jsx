@@ -3,6 +3,10 @@ import { Activity, Download, FlaskConical, Layers3, Play, Radio, UserRoundPlus, 
 import { CONTROL, GUIDED } from './experiment'
 import { configuredId, connectDemo, demoMode, environmentID, runDemoBatch } from './runtime'
 import RecordedResult from './RecordedResult'
+import StudyLinks from './StudyLinks'
+import TracePanel from './TracePanel'
+
+const views = { '#results': 'result', '#trace': 'trace', '#participants': 'participants' }
 
 function Simulator({ busy, setBusy, notify }) {
   const [stats, setStats] = useState(null)
@@ -62,12 +66,20 @@ function Simulator({ busy, setBusy, notify }) {
 export default function Inspector({ identity, assignment, preview, setPreview, canPreview, newVisitor, canReset, notify, lastEvent }) {
   const dialog = useRef(null)
   const opener = useRef(null)
-  const showRecordedResult = demoMode && window.location.hash === '#results'
-  const [open, setOpen] = useState(showRecordedResult)
-  const [view, setView] = useState(showRecordedResult ? 'result' : 'visitor')
+  const initialView = demoMode && views[window.location.hash]
+  const [open, setOpen] = useState(Boolean(initialView))
+  const [view, setView] = useState(initialView || 'visitor')
   const [busy, setBusy] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState('')
+  useEffect(() => {
+    function followLink() {
+      const requested = views[window.location.hash]
+      if (requested) { setView(requested); setOpen(true) }
+    }
+    window.addEventListener('hashchange', followLink)
+    return () => window.removeEventListener('hashchange', followLink)
+  }, [])
   useEffect(() => {
     const el = dialog.current
     if (open && !el.open) el.showModal()
@@ -88,7 +100,9 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
           <button type="button" aria-label="Close inspector" className="icon-button" onClick={() => setOpen(false)}><X size={19} /></button></header>
         {demoMode && <nav className="inspect-switch" aria-label="Inspector views">
           <button type="button" aria-pressed={view === 'visitor'} onClick={() => setView('visitor')}>Visitor &amp; traffic</button>
+          <button type="button" aria-pressed={view === 'trace'} onClick={() => setView('trace')}>Event trace</button>
           <button type="button" aria-pressed={view === 'result'} onClick={() => setView('result')}>Recorded result</button>
+          <button type="button" aria-pressed={view === 'participants'} onClick={() => setView('participants')}>Participant links</button>
         </nav>}
         <div className="inspect-body" hidden={view !== 'visitor'}>
           <section className="inspect-section"><h3><Radio size={17} />Visitor assignment</h3>
@@ -117,6 +131,8 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
           <Simulator busy={busy} setBusy={setBusy} notify={notify} />
         </div>
         {demoMode && view === 'result' && <div className="inspect-body"><RecordedResult /></div>}
+        {demoMode && view === 'trace' && <div className="inspect-body"><TracePanel /></div>}
+        {demoMode && view === 'participants' && <div className="inspect-body"><StudyLinks /></div>}
       </dialog>
     </>
   )

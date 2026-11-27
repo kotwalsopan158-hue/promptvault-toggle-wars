@@ -7,7 +7,8 @@ import Editor from './Editor'
 import Inspector from './Inspector'
 import Library from './Library'
 import { CONTROL, EVENT, GUIDED, fallback } from './experiment'
-import { demoMode, liveClient } from './runtime'
+import { demoMode, environmentID, identityKey, invalidLink, liveClient, visitorTrace } from './runtime'
+import { EXPOSURE } from './visitor-trace'
 import { decisionBrief } from './templates'
 import { listWorkflows, saveWorkflow, visitor, visitorId } from './workspace'
 
@@ -42,7 +43,7 @@ function App() {
     setReady(false); setAssignment(loading); setPreview(null); setDraft(null); setItems([])
     setLastEvent(''); setStorageError(''); setToast(null); setSaveError('')
     exposure.current = null
-    const who = await visitor(fresh)
+    const who = await visitor(fresh, identityKey)
     if (current !== generation.current) return
     setIdentity(who)
     const [library, evaluated] = await Promise.allSettled([
@@ -52,7 +53,9 @@ function App() {
     if (current !== generation.current) return
     if (library.status === 'fulfilled') setItems(library.value)
     else setStorageError('Browser storage could not open your library. Enable site storage and reload to save workflows.')
-    setAssignment(evaluated.status === 'fulfilled' ? evaluated.value : fallback('Could not load the experiment.'))
+    const resolved = evaluated.status === 'fulfilled' ? evaluated.value : fallback('Could not load the experiment.')
+    if (demoMode) visitorTrace.begin(who.id, resolved, environmentID)
+    setAssignment(resolved)
     setReady(true)
   }, [])
 
@@ -67,8 +70,11 @@ function App() {
       if (document.visibilityState !== 'visible' || document.querySelector('dialog[open]') || exposure.current?.id === identity.id) return
       if (liveClient.expose(identity.id, assignment)) {
         exposure.current = { id: identity.id, assignment }
-        setLastEvent('$flag_exposure')
-        notify('Exposure queued · ' + assignment.variant)
+        if (demoMode) {
+          visitorTrace.queued(EXPOSURE)
+          setLastEvent(EXPOSURE)
+          notify('Exposure queued · ' + assignment.variant)
+        }
         void liveClient.flush().catch(() => {})
       }
     }
@@ -122,12 +128,15 @@ function App() {
         try {
           const tracked = liveClient.convert(identity.id, exposure.current.assignment, demoMode ? 'demo_manual' : 'human')
           if (tracked) {
-            setLastEvent(EVENT)
-            message = 'Workflow saved · ' + EVENT + ' queued.'
+            if (demoMode) {
+              visitorTrace.queued(EVENT)
+              setLastEvent(EVENT)
+              message = 'Workflow saved · ' + EVENT + ' queued.'
+            }
             void liveClient.flush().catch(() => {})
           }
         } catch { message = 'Workflow saved. Event tracking was unavailable.' }
-      } else if (first) message = 'Workflow saved locally. No experiment event was queued.'
+      } else if (first && demoMode) message = 'Workflow saved locally. No experiment event was queued.'
       notify(message)
       window.scrollTo(0, 0)
     } catch (err) {
@@ -149,14 +158,15 @@ function App() {
         <div className="device-label"><Monitor size={15} /><span>On this device</span></div>
       </div></header>
       {storageError && <div className="notice" role="alert"><Database size={16} />{storageError}</div>}
+      {invalidLink && <div className="notice" role="status">This study link is incomplete. You can still save workflows on this device.</div>}
       {!ready ? <main id="main" className="page loading-page" aria-busy="true"><div className="context">Personal workspace</div>
         <h1>Workflow library</h1><p role="status">Opening your workspace.</p></main>
         : draft ? <Editor key={draft.id} draft={draft} editing={items.some(i => i.id === draft.id)} onCancel={() => setDraft(null)} onSave={save} copy={copy} saving={saving} error={saveError} />
-        : <Library items={items} variant={displayedVariant} preview={preview} create={() => openEditor()} edit={openEditor} copy={copy} />}
-      <Inspector identity={identity} assignment={assignment} preview={preview} setPreview={setPreview}
+        : <Library items={items} variant={displayedVariant} preview={preview} create={() => openEditor()} edit={openEditor} copy={copy} study={!demoMode && !invalidLink} />}
+      {demoMode && <Inspector identity={identity} assignment={assignment} preview={preview} setPreview={setPreview}
         canPreview={demoMode && ready && assignment.source === 'fallback' && !draft && items.length === 0}
         canReset={ready && !draft && !saving} newVisitor={() => { void startSession(true) }}
-        notify={notify} lastEvent={lastEvent} />
+        notify={notify} lastEvent={lastEvent} />}
       <div className="toast-region" role="status" aria-live="polite" aria-atomic="true">
         {toast && <div className="toast" key={toast.key}><Check size={17} /><span>{toast.message}</span>
           <button className="dismiss" type="button" aria-label="Dismiss notification" onClick={() => setToast(null)}><X size={15} /></button></div>}

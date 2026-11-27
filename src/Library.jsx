@@ -42,7 +42,7 @@ function EmptyState({ variant, create, preview }) {
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 
-export default function Library({ items, variant, preview, create, edit, copy }) {
+export default function Library({ items, variant, preview, create, edit, copy, study }) {
   return (
     <main id="main" className="page">
       <div className="page-intro">
@@ -77,6 +77,7 @@ export default function Library({ items, variant, preview, create, edit, copy })
         )}
       </section>
       <div className="workspace-foot"><BookOpen size={15} /><span>Personal library</span><span className="foot-line" /></div>
+      {study && <p className="study-note">This study measures first saves using a random browser ID. Your workflow text stays on this device.</p>}
     </main>
   )
 }

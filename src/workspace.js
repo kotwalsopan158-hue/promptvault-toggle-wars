@@ -1,4 +1,3 @@
-const USER_KEY = 'user_id'
 const DB_NAME = 'promptvault-workflows-v1'
 let database
 
@@ -7,20 +6,20 @@ export function visitorId(prefix = 'pv') {
   return prefix + '_' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export async function visitor(fresh = false) {
+export async function visitor(fresh = false, identityKey = 'user_id') {
   function select() {
     const next = visitorId()
     try {
-      const previous = localStorage.getItem(USER_KEY)
+      const previous = localStorage.getItem(identityKey)
       if (!fresh && /^pv_[a-f0-9]{32}$/.test(previous || '')) return { id: previous, persistent: true }
-      localStorage.setItem(USER_KEY, next)
+      localStorage.setItem(identityKey, next)
       return { id: next, persistent: true }
     } catch {
       return { id: next, persistent: false }
     }
   }
   if (globalThis.navigator?.locks) {
-    try { return await navigator.locks.request('promptvault-identity', select) } catch { /* Some local file origins disable Web Locks. */ }
+    try { return await navigator.locks.request('promptvault-identity:' + identityKey, select) } catch { /* Some local file origins disable Web Locks. */ }
   }
   return select()
 }
@@ -53,12 +52,17 @@ export async function listWorkflows(owner) {
   })
 }
 
-export async function saveWorkflow(owner, draft) {
+export function workflowText(draft) {
   const title = draft.title.trim()
   const prompt = draft.prompt.trim()
   if (!title || !prompt || title.length > 100 || prompt.length > 12000) {
     throw new Error('Enter a title (1-100 characters) and a prompt (1-12,000 characters).')
   }
+  return { title, prompt }
+}
+
+export async function saveWorkflow(owner, draft) {
+  const { title, prompt } = workflowText(draft)
   const db = await connect()
   return new Promise((resolve, reject) => {
     // Read and write in one transaction so simultaneous first saves have one winner.

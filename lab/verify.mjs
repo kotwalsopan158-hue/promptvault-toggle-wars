@@ -4,6 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium } from '@playwright/test'
 import { managementClient } from './setup.mjs'
+import { verifyStudyLink } from './verify-study.mjs'
 
 const lab = JSON.parse(readFileSync('.promptvault-lab/experiment.json', 'utf8'))
 const auth = JSON.parse(readFileSync('.promptvault-lab/credentials.json', 'utf8'))
@@ -51,6 +52,20 @@ try {
   await conversion
 
   await page.getByRole('button', { name: 'Experiment inspector', exact: true }).click()
+  await page.getByRole('button', { name: 'Event trace' }).click()
+  await page.getByText('Acknowledged', { exact: true }).nth(1).waitFor()
+  const traceUri = await page.getByRole('link', { name: 'Download visitor trace' }).getAttribute('href')
+  const trace = JSON.parse(decodeURIComponent(traceUri.slice(traceUri.indexOf(',') + 1)))
+  assert.equal(trace.identifier, identity)
+  assert.equal(trace.experiment_id, lab.experiment)
+  assert.equal(trace.events.first_workflow_created.status, 'acknowledged')
+  const proof = {
+    source: 'Scripted visitor in an isolated self-hosted Flagsmith experiment',
+    ci_url: process.env.GITHUB_RUN_ID ? 'https://github.com/' + process.env.GITHUB_REPOSITORY + '/actions/runs/' + process.env.GITHUB_RUN_ID : null,
+    trace,
+  }
+  console.log('VISITOR_TRACE_EVIDENCE ' + JSON.stringify(proof))
+  await page.getByRole('button', { name: 'Visitor & traffic' }).click()
   const receipts = []
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Simulate 100 Visitors' }).click()
@@ -94,6 +109,9 @@ try {
   writeFileSync('lab-output/flagsmith-results.json', JSON.stringify(evidence, null, 2) + '\n')
   writeFileSync('lab-output/run-receipts.json', JSON.stringify(receipts, null, 2) + '\n')
   console.log('FLAGSMITH_EVIDENCE ' + JSON.stringify(evidence))
+  const participant = JSON.parse(readFileSync('.promptvault-lab/participant.json', 'utf8'))
+  assert.notEqual(participant.environment, lab.environment)
+  await verifyStudyLink(browser, page, participant, manage)
 } finally {
   await browser?.close()
   server.kill()

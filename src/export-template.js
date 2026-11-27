@@ -1,4 +1,21 @@
 import { promptFields } from './prompt-inputs.js'
+import { workflowText } from './workspace.js'
+
+export const maxTemplateBytes = 128 * 1024
+
+export function readMarkdownTemplate(markdown) {
+  const lines = markdown.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').trimEnd().split('\n')
+  const section = lines.indexOf('## Reusable prompt')
+  const fence = lines[section + 2]?.match(/^(`{3,})text$/)?.[1]
+  const closing = fence ? lines.indexOf(fence, section + 3) : -1
+  if (!lines[0].startsWith('# ') || section < 1 || lines[section + 1] !== '' || closing !== lines.length - 1 || !fence) {
+    throw Error('Choose a Markdown file exported by PromptVault. It needs a title and a fenced Reusable prompt section.')
+  }
+  return workflowText({
+    title: lines[0].slice(2).replace(/\\([\\`*_{}[\]()#+.!<>|~-])/g, '$1'),
+    prompt: lines.slice(section + 3, closing).join('\n'),
+  })
+}
 
 export function markdownTemplate({ title, prompt }) {
   const heading = title.replace(/[\r\n]+/g, ' ').replace(/[\\`*_{}[\]()#+.!<>|~-]/g, '\\$&')
