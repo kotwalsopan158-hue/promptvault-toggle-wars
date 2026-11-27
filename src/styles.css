@@ -1117,3 +1117,33 @@ input::placeholder,textarea::placeholder {
 }
 .use-field textarea[readonly] { background: #f8f7fa; }
 .use-content .button { margin-top: 14px; }
+
+.export-saved { margin-top: 16px; }
+.inspect-switch { display: flex; gap: 6px; padding: 12px 18px 0; }
+.inspect-switch button {
+  flex: 1;
+  min-height: 40px;
+  border: 1px solid #d8d2e3;
+  border-radius: 8px;
+  color: #423754;
+  font-weight: 600;
+  font-size: .9rem;
+}
+.inspect-switch button[aria-pressed=true] { background: #ede8fb; border-color: #9a80d9; color: #472b82; }
+.evidence .evidence-date { color: #644d88; margin: 0 0 6px; font-size: .84rem; font-weight: 650; }
+.evidence h3 { font-size: 1.2rem; }
+.evidence table { width: 100%; margin: 14px 0 10px; font-variant-numeric: tabular-nums; font-size: .9rem; }
+.evidence th, .evidence td { padding: 7px 4px; text-align: right; border-bottom: 1px solid #e7e3ed; }
+.evidence th:first-child { text-align: left; }
+.evidence thead th { font-size: .8rem; color: #554c61; }
+.evidence .evidence-metrics > div { grid-template-columns: 1fr auto; align-items: center; padding: 6px 0; }
+.evidence .evidence-metrics dd { color: #4b3381; font-weight: 750; font-size: 1.1rem; }
+.interval { margin: 14px 0; padding: 12px; background: #f4f1fa; border-radius: 10px; }
+.interval figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 8px; font-size: .85rem; }
+.interval-axis { position: relative; height: 2px; margin: 19px 3px 12px; background: #c4bbd1; }
+.interval-zero, .interval-range, .interval-estimate { position: absolute; }
+.interval-zero { left: 50%; top: -9px; height: 19px; border-left: 1px dashed #48385d; }
+.interval-range { height: 6px; top: -2px; background: #8664c7; border-radius: 5px; }
+.interval-estimate { width: 12px; height: 12px; top: -5px; transform: translateX(-50%); border-radius: 50%; background: #43286f; border: 2px solid white; }
+.interval-labels { display: flex; justify-content: space-between; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.evidence a { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; color: #50368c; text-decoration: underline; }

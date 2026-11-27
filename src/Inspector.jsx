@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Activity, Download, FlaskConical, Layers3, Play, Radio, UserRoundPlus, X } from 'lucide-react'
 import { CONTROL, GUIDED } from './experiment'
 import { configuredId, connectDemo, demoMode, environmentID, runDemoBatch } from './runtime'
+import RecordedResult from './RecordedResult'
 
 function Simulator({ busy, setBusy, notify }) {
   const [stats, setStats] = useState(null)
@@ -62,6 +63,7 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
   const dialog = useRef(null)
   const opener = useRef(null)
   const [open, setOpen] = useState(false)
+  const [view, setView] = useState('visitor')
   const [busy, setBusy] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState('')
@@ -83,7 +85,11 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
         <header className="inspect-header"><div><div className="context"><FlaskConical size={14} />{demoMode ? 'Demo environment' : 'Research environment'}</div>
           <h2 id="inspect-title">Experiment Inspector &amp; Traffic Simulator</h2></div>
           <button type="button" aria-label="Close inspector" className="icon-button" onClick={() => setOpen(false)}><X size={19} /></button></header>
-        <div className="inspect-body">
+        {demoMode && <nav className="inspect-switch" aria-label="Inspector views">
+          <button type="button" aria-pressed={view === 'visitor'} onClick={() => setView('visitor')}>Visitor &amp; traffic</button>
+          <button type="button" aria-pressed={view === 'result'} onClick={() => setView('result')}>Recorded result</button>
+        </nav>}
+        <div className="inspect-body" hidden={view !== 'visitor'}>
           <section className="inspect-section"><h3><Radio size={17} />Visitor assignment</h3>
             <dl><div><dt>Connection</dt><dd>{assignment.source === 'live' ? 'Live · Flagsmith' : assignment.source === 'loading' ? 'Connecting' : 'Fallback · local control'}</dd></div>
               <div><dt>user_id</dt><dd className="mono">{identity?.id || 'Loading.'}</dd></div>
@@ -109,6 +115,7 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
             </form></details>}
           <Simulator busy={busy} setBusy={setBusy} notify={notify} />
         </div>
+        {demoMode && view === 'result' && <div className="inspect-body"><RecordedResult /></div>}
       </dialog>
     </>
   )

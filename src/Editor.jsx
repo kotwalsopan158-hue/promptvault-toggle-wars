@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronLeft, FileText, Save } from 'lucide-react'
+import { ChevronLeft, Download, FileText, Save } from 'lucide-react'
 
 import PromptFill from './PromptFill'
+import { downloadTemplate } from './export-template.js'
 
 export default function Editor({ draft, editing, onCancel, onSave, saving, error, copy }) {
   const [title, setTitle] = useState(draft.title)
@@ -31,7 +32,12 @@ export default function Editor({ draft, editing, onCancel, onSave, saving, error
         <div className="editor-actions"><button type="button" className="button secondary" onClick={onCancel} disabled={saving}>Cancel</button>
           <button type="submit" className="button primary" disabled={saving || !title.trim() || !prompt.trim()}><Save size={16} />{saving ? 'Saving.' : 'Save workflow'}</button></div>
       </form>
-      {editing && <PromptFill prompt={prompt} initiallyOpen={draft.openInputs} copy={copy} />}
+      {editing && <>
+        <PromptFill prompt={prompt} initiallyOpen={draft.openInputs} copy={copy} />
+        <button type="button" className="button secondary export-saved" onClick={() => downloadTemplate(draft)}>
+          <Download size={16} />Export saved template (.md)
+        </button>
+      </>}
     </main>
   )
 }

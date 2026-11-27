@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
 
 const inspect = page => page.getByRole('button', { name: 'Experiment inspector', exact: true }).click()
 const close = page => page.getByRole('button', { name: 'Close inspector' }).click()
@@ -133,8 +134,30 @@ test('a saved prompt fills reusable fields locally while retaining its template'
   await page.getByLabel('audience', { exact: true }).fill('the design team')
   await expect(page.getByLabel('Ready-to-use prompt')).toHaveValue('Summarize The launch is Friday for the design team.')
   await expect(page.getByRole('button', { name: 'Copy finished prompt' })).toBeEnabled()
+  const downloading = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Export saved template (.md)' }).click()
+  const file = await downloading
+  expect(file.suggestedFilename()).toBe('promptvault-meeting-notes.md')
+  const markdown = await readFile(await file.path(), 'utf8')
+  expect(markdown).toContain('Summarize {{notes}} for {{audience}}.')
+  expect(markdown).not.toContain('The launch is Friday')
   await page.reload()
   await page.getByRole('button', { name: 'Fill inputs for Meeting notes' }).click()
   await expect(page.getByLabel('notes', { exact: true })).toHaveValue('')
   await expect(page.getByLabel('Reusable prompt')).toHaveValue('Summarize {{notes}} for {{audience}}.')
+})
+
+test('recorded evidence works offline and identifies synthetic traffic and uncertainty', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 })
+  await page.goto('/')
+  await inspect(page)
+  await page.getByRole('button', { name: 'Recorded result' }).click()
+  await expect(page.getByRole('heading', { name: 'Did the guided start help?' })).toBeVisible()
+  await expect(page.getByText(/Synthetic traffic/)).toBeVisible()
+  await expect(page.getByRole('row', { name: /Control 28 \/ 145 19.31%/ })).toBeVisible()
+  await expect(page.getByText('88.9%')).toBeVisible()
+  await expect(page.getByText(/The interval crosses zero/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Verify the warehouse run' })).toHaveAttribute('href', /actions\/runs\/45919688828$/)
+  await page.getByRole('button', { name: 'Visitor & traffic' }).click()
+  await expect(page.getByRole('button', { name: 'New Visitor Session' })).toBeVisible()
 })
