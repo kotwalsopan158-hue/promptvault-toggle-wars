@@ -5,7 +5,9 @@ A two-screen library for prompts worth using twice. Save a workflow, reopen it, 
 **Toggle Wars · Track 01 · Test Something Real**  
 [Source repository](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars) · [Two-minute demo script](DEMO.md) · [Build and browser checks](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/workflows/verify.yml)
 
-## One question
+**Try it without installing anything.** Download `PromptVault.html` and open it in a modern browser. Both onboarding variants can be previewed offline. The release also includes a ZIP and a single Markdown file containing every tracked source file. [Download the app and source](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/releases/tag/v1.0.0)
+
+## Experiment design
 
 When someone opens an empty prompt library, does starting from an editable decision brief help them save their first useful workflow?
 
@@ -86,7 +88,7 @@ For a human study, select a **different environment**, enable its warehouse, ver
 | Evaluation | Initializes with the visitor ID, `enableAnalytics: true` and `enableEvents: true`. A new judge identity calls `identify` on the active client. A fresh server response and `getValue` determine the arm. |
 | Exposure | After a real empty-state card is rendered in a visible tab, `getExperimentFlag` records `$flag_exposure` for an enrolled identity. A covered card waits until the inspector closes. Opening a populated library produces no onboarding exposure. |
 | Conversion | An IndexedDB transaction checks the owner’s record count and commits the workflow. Only a successful first write under an exposed identity calls `trackEvent('first_workflow_created', { identifier, metadata })`. Simultaneous saves in different tabs produce one first save. |
-| Delivery | The SDK buffers events. The app asks it to flush after each manual exposure and conversion, when the page is hidden, and at the end of a simulation. Toasts say **queued**. The warehouse confirms attribution. |
+| Delivery | The SDK buffers events. The app flushes after manual exposure and conversion, when the page is hidden, and at the end of each simulation. Foreground batches use ordinary requests. Small event requests may use keepalive when the page is hidden. Toasts say **queued**. The warehouse confirms attribution. |
 | Failure | A missing key, unreachable API, unknown value, or invalid experiment key selects local control. Conversion tracking stays quiet. A live flag outside rollout can render without enrolling the user. Failed writes keep the draft open. |
 
 Browser profiles and devices have independent identities. Clearing site data removes the local ID and workflows. A crash between a committed save and telemetry delivery can lose a conversion. Workflow names, prompts and filled inputs never appear in the events. [Official JavaScript SDK lifecycle](https://docs.flagsmith.com/experimentation/run-an-experiment)
@@ -95,11 +97,24 @@ Browser profiles and devices have independent identities. Clearing site data rem
 
 **New Visitor Session** creates a new ID and opens that visitor’s library. Consecutive visitors may legitimately get the same arm. **Simulate 100 Visitors** uses a separate SDK client and 100 distinct IDs, one identity evaluation at a time. Flagsmith assigns the actual arm. The runner samples one possible save at **16% for control** or **29% for guided templates**. It calls `flushEvents()` even after a partial run.
 
-The inspector shows per-arm queued exposures and saves, skipped visitors, and the number of distinct identities in event batches acknowledged by the HTTP ingestion endpoint. **Download run receipt** saves those counts, the experiment ID, timestamps and programmed rates as JSON. A 2xx ingestion response still precedes warehouse analysis. Only human traffic in the research environment measures the product hypothesis.
+The inspector shows per-arm queued exposures and saves, skipped visitors, and the number of distinct identities acknowledged by the ingestion endpoint. It excludes individually rejected events from its receipt and displays **Delivery incomplete** when the totals differ. **Download run receipt** saves those counts, the experiment ID, timestamps and programmed rates as JSON. A 2xx ingestion response still precedes warehouse analysis. Only human traffic in the research environment measures the product hypothesis.
 
 ## Experiment results
 
-**Human research status:** Awaiting recruitment. No human conversion lift, win probability or credible interval has been measured.
+### Verified synthetic run
+
+A real self-hosted Flagsmith 2.295.2 server assigned all arms and computed the following snapshot on 27 November 2026. Three 100-visitor batches produced 68 saves. One additional scripted browser visitor refreshed the page and saved once. The warehouse counted 301 distinct exposed identities and 69 converters. [Recorded Flagsmith output](evidence/synthetic-flagsmith.json) · [Reproducible run](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/runs/45919688828)
+
+| Arm | Exposed identities | First saves | Save rate |
+| --- | ---: | ---: | ---: |
+| `control` | 145 | 28 | 19.31% |
+| `guided_templates` | 156 | 41 | 26.28% |
+
+The observed difference was **+6.97 percentage points**, or **+36.1% relative lift**. Flagsmith reported an **88.9% win probability** for guided and a **95% credible interval for relative lift from −21.8% to +94.0%**. Both harm and benefit fit this interval. The warehouse returned no sample-ratio-mismatch statistic for this snapshot. The programmed save probabilities drive these observations. They verify the event pipeline and provide no basis for choosing onboarding for real people.
+
+### Human study
+
+The human study awaits recruitment. This submission contains no measured human conversion rate, lift, win probability or credible interval.
 
 | Human arm | Exposed | First saves | Conversion rate | Relative lift | Win probability | 95% credible interval for lift |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -108,11 +123,11 @@ The inspector shows per-arm queued exposures and saves, skipped visitors, and th
 
 **Read the denominator first.** Conversion rate is converted identities divided by exposed identities. Subtract the control rate from the guided rate for the absolute change in percentage points. Divide that change by the control rate for relative lift. When control has zero conversions, report the absolute change and leave observed relative lift undefined.
 
-**Worked example.** If control saves 8 of 50 workflows and guided saves 12 of 50, the rates are 16% and 24%. The difference is **8 percentage points**. The relative lift is **50%**. These invented counts illustrate the units. Use the Flagsmith readout to quantify uncertainty for an actual run.
+**Reading the example above.** Guided saved 41/156 and control saved 28/145. Subtract the two rates to get 0.0697, or 6.97 percentage points. Divide 0.0697 by the control rate of 0.1931 to get 0.361, or 36.1% relative lift.
 
 **Win probability** is the model’s probability that the treatment beats control given the observed data. The **95% credible interval** gives a range containing 95% of the model’s posterior probability for the lift. An interval crossing zero allows both a gain and a loss. A positive point estimate alone cannot settle the decision. When Flagsmith shows **Collecting data**, report that status. Each arm needs at least 50 identities and five conversions for occurrence analysis. Investigate a sample ratio mismatch or a growing number of excluded identities before interpreting an effect. [Statistics glossary](https://docs.flagsmith.com/experimentation/statistics)
 
-**Decision rule.** At the 72-hour cutoff, support rollout only when the human study has healthy assignment, an observed gain of at least five percentage points, win probability of at least 95%, and a lift interval wholly above zero. A wholly negative interval favors control. With low volume or an interval crossing zero, keep collecting human evidence.
+**Decision rule.** At the 72-hour cutoff, support rollout only when the human study has healthy assignment, an observed gain of at least five percentage points, win probability of at least 95%, and a lift interval wholly above zero. A wholly negative interval favors control. With low volume or an interval crossing zero at the cutoff, record this study as inconclusive. Set a new measurement window before gathering further evidence.
 
 ## Verification
 

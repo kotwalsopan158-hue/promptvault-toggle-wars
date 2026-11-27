@@ -29,3 +29,26 @@ jobs:
         with:
           name: promptvault-complete-project
           path: release/
+
+  release:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'Release PromptVault v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v5
+        with:
+          name: promptvault-complete-project
+          path: release
+      - name: Publish the verified app and complete source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          gh release create "$tag" release/PromptVault.html release/PromptVault-full-source.md release/PromptVault-source.zip \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "PromptVault $tag" \
+            --notes "Open PromptVault.html to try the app. The ZIP contains the full project, Flagsmith Cloud setup, measured synthetic results, and the two-minute demo script. The Markdown download contains every tracked file in full."
