@@ -28,3 +28,17 @@ test('receipt counts only acknowledged identities in its own batch and deduplica
   assert.equal(data.visitors_skipped, 1)
   assert.equal(JSON.stringify(data).includes(a), false)
 })
+
+test('a partial acceptance excludes rejected event indexes from the receipt', () => {
+  const report = createBatchReceipt('partial')
+  const id = report.nextId()
+  const events = [
+    { identifier: id, event: '$flag_exposure', feature_name: FLAG, value: 'control' },
+    { identifier: id, event: EVENT },
+  ]
+  report.accept(events, { accepted: 1, rejected: [{ index: 1, error: 'Rejected' }] })
+  report.accept(events, { accepted: 2, rejected: [{ index: 1 }] })
+  const result = report.finish({ variants: { control: { exposures: 1, conversions: 1 } } })
+  assert.deepEqual(result.http_accepted_distinct_ids, { exposures: 1, conversions: 0 })
+  assert.equal(result.all_queued_events_acknowledged, false)
+})

@@ -19,7 +19,9 @@ function Simulator({ busy, setBusy, notify }) {
     try {
       const { stats: result, receipt: report } = await runDemoBatch(setStats)
       setReceipt(report)
-      notify(result.error ? 'Simulation stopped. See the inspector.' : 'Simulation finished. Check ingestion in Flagsmith.')
+      if (result.error) notify('Simulation stopped. See the inspector.')
+      else if (!report.all_queued_events_acknowledged) notify('Delivery incomplete. See the batch receipt.')
+      else notify('Simulation finished. Check ingestion in Flagsmith.')
     } catch {
       setFailure('The run stopped. Check the demo environment and try again.')
     } finally {
@@ -27,6 +29,10 @@ function Simulator({ busy, setBusy, notify }) {
       setBusy(false)
     }
   }
+  let runStatus = 'Batch finished'
+  if (busy) runStatus = 'Running'
+  else if (stats?.error || failure) runStatus = 'Stopped early'
+  else if (receipt?.all_queued_events_acknowledged === false) runStatus = 'Delivery incomplete'
   return (
     <section className="inspect-section">
       <h3><Activity size={17} />Traffic simulator</h3>
@@ -35,7 +41,7 @@ function Simulator({ busy, setBusy, notify }) {
         <Play size={15} />{busy ? 'Simulating visitors.' : 'Simulate 100 Visitors'}</button>
       {!canRun && <small>{demoMode ? 'Connect a demo environment to send traffic.' : 'Simulation is disabled in research mode.'}</small>}
       {(stats || busy) && <div className="run-stats" aria-busy={busy}>
-        <div><strong>{busy ? 'Running' : stats?.error || failure ? 'Stopped early' : 'Batch finished'}</strong><span>{stats?.attempted || 0} / 100</span></div>
+        <div><strong>{runStatus}</strong><span>{stats?.attempted || 0} / 100</span></div>
         <progress max="100" value={stats?.attempted || 0} aria-label="Visitors processed" />
         <table><caption>Events queued by the SDK</caption><thead><tr><th>Arm</th><th>Exposed</th><th>Saved</th></tr></thead>
           <tbody>{[CONTROL, GUIDED].map(v => <tr key={v}><th>{v === CONTROL ? 'Control' : 'Guided'}</th>
@@ -79,7 +85,7 @@ export default function Inspector({ identity, assignment, preview, setPreview, c
           <button type="button" aria-label="Close inspector" className="icon-button" onClick={() => setOpen(false)}><X size={19} /></button></header>
         <div className="inspect-body">
           <section className="inspect-section"><h3><Radio size={17} />Visitor assignment</h3>
-            <dl><div><dt>Connection</dt><dd>{assignment.source === 'live' ? 'Live � Flagsmith' : assignment.source === 'loading' ? 'Connecting' : 'Fallback � local control'}</dd></div>
+            <dl><div><dt>Connection</dt><dd>{assignment.source === 'live' ? 'Live · Flagsmith' : assignment.source === 'loading' ? 'Connecting' : 'Fallback · local control'}</dd></div>
               <div><dt>user_id</dt><dd className="mono">{identity?.id || 'Loading.'}</dd></div>
               <div><dt>Assigned variant</dt><dd className="mono">{assignment.source === 'loading' ? 'Pending' : assignment.variant}</dd></div>
               <div><dt>Enrollment</dt><dd>{assignment.enrolled ? 'Enrolled' : 'Outside experiment'}</dd></div>

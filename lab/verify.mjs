@@ -54,11 +54,13 @@ try {
   const receipts = []
   for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: 'Simulate 100 Visitors' }).click()
-    await page.getByText('Batch finished', { exact: true }).waitFor({ timeout: 120000 })
+    await page.getByRole('button', { name: 'Simulate 100 Visitors', exact: true }).waitFor({ timeout: 120000 })
+    await page.getByRole('link', { name: 'Download run receipt' }).waitFor({ timeout: 120000 })
     const href = await page.getByRole('link', { name: 'Download run receipt' }).getAttribute('href')
     const receipt = JSON.parse(decodeURIComponent(href.slice(href.indexOf(',') + 1)))
     console.log('Batch totals', JSON.stringify({ attempted: receipt.visitors_attempted, skipped: receipt.visitors_skipped, queued: receipt.sdk_queued_by_arm, accepted: receipt.http_accepted_distinct_ids }))
     assert.equal(receipt.http_accepted_distinct_ids.exposures, 100, 'Ingestion must acknowledge every synthetic exposure')
+    assert(receipt.all_queued_events_acknowledged, 'Every queued exposure and first save needs an HTTP acknowledgment')
     assert.equal(receipt.visitors_skipped, 0)
     receipts.push(receipt)
   }

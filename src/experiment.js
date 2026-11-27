@@ -13,8 +13,10 @@ export async function boundedFetch(url, options = {}) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 6000)
   try {
-    const keepalive = options.method === 'POST' && typeof options.body === 'string'
-      && new Blob([options.body]).size < 60000
+    // Reserve the browser's shared keepalive upload budget for a page that is leaving.
+    const keepalive = globalThis.document?.visibilityState === 'hidden'
+      && options.method === 'POST' && typeof options.body === 'string'
+      && /\/v1\/events\/?$/.test(String(url)) && new Blob([options.body]).size < 60000
     return await fetch(url, { ...options, keepalive, signal: controller.signal })
   } finally {
     clearTimeout(timeout)

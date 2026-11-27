@@ -13,8 +13,9 @@ async function mockCloud(page, choose, { enrolled = true, outage = false } = {})
     const headers = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS' }
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers })
     if (url.pathname.endsWith('/v1/events')) {
-      events.push(...route.request().postDataJSON().events)
-      return route.fulfill({ json: {}, headers })
+      const batch = route.request().postDataJSON().events
+      events.push(...batch)
+      return route.fulfill({ status: 202, json: { accepted: batch.length, rejected: [] }, headers })
     }
     if (url.pathname.includes('/identities')) {
       if (outage) return route.abort('failed')
@@ -36,7 +37,7 @@ test('offline mobile flow saves locally and can preview the guided arm explicitl
   await expect(page.getByRole('heading', { name: 'Create your first workflow.' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Create workflow' })).toBeInViewport()
   await inspect(page)
-  await expect(page.getByText('Fallback � local control')).toBeVisible()
+  await expect(page.getByText('Fallback · local control')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Simulate 100 Visitors' })).toBeDisabled()
   await page.getByRole('button', { name: 'Guided template', exact: true }).click()
   await page.getByRole('button', { name: 'Use decision brief' }).click()

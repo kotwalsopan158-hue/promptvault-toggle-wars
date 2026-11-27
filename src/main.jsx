@@ -68,7 +68,7 @@ function App() {
       if (liveClient.expose(identity.id, assignment)) {
         exposure.current = { id: identity.id, assignment }
         setLastEvent('$flag_exposure')
-        notify('Exposure queued � ' + assignment.variant)
+        notify('Exposure queued · ' + assignment.variant)
         void liveClient.flush().catch(() => {})
       }
     }
@@ -123,7 +123,7 @@ function App() {
           const tracked = liveClient.convert(identity.id, exposure.current.assignment, demoMode ? 'demo_manual' : 'human')
           if (tracked) {
             setLastEvent(EVENT)
-            message = 'Workflow saved � ' + EVENT + ' queued.'
+            message = 'Workflow saved · ' + EVENT + ' queued.'
             void liveClient.flush().catch(() => {})
           }
         } catch { message = 'Workflow saved. Event tracking was unavailable.' }

@@ -20,8 +20,15 @@ export const environmentID = configuredId || (demoMode ? demoOverride() : '')
 // and carrying this run's unique prefix contribute to the optional simulator receipt.
 async function deliveryFetch(url, options) {
   const response = await boundedFetch(url, options)
-  if (activeBatch && response.ok && options?.method === 'POST' && /\/v1\/events\/?$/.test(String(url))) {
-    try { activeBatch.accept(JSON.parse(options.body).events) } catch { /* A receipt never interrupts delivery. */ }
+  if (options?.method === 'POST' && /\/v1\/events\/?$/.test(String(url))) {
+    // The SDK reads only the event HTTP status. Drain the response to release
+    // the connection and check whether this batch was partially accepted.
+    const body = await response.text()
+    if (activeBatch && response.ok) {
+      try {
+        activeBatch.accept(JSON.parse(options.body).events, body ? JSON.parse(body) : undefined)
+      } catch { /* Unreadable acknowledgments cannot substantiate a receipt. */ }
+    }
   }
   return response
 }
