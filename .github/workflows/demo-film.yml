@@ -1,0 +1,52 @@
+name: Record the working demo
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'demo/**'
+      - '.github/workflows/demo-film.yml'
+permissions:
+  contents: read
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: Start the isolated experiment
+        run: |
+          node lab/start.mjs --prepare
+          cat .promptvault-lab/browser.env >> "$GITHUB_ENV"
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Verify the warehouse counts
+        run: node lab/verify.mjs
+      - name: Install video and speech tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core
+          mkdir -p lab-output/film
+          voice_root=https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/ljspeech/medium
+          voice=en_US-ljspeech-medium.onnx
+          if python -m pip install --quiet 'piper-tts==1.3.0' && \
+             curl -fsSL --max-time 90 --retry 2 "$voice_root/$voice.json" -o "lab-output/film/$voice.json" && \
+             curl -fsSL --max-time 90 --retry 2 "$voice_root/$voice" -o "lab-output/film/$voice.part"; then
+            mv "lab-output/film/$voice.part" "lab-output/film/$voice"
+          fi
+      - name: Film both live arms, a real save and Flagsmith results
+        run: node demo/capture.mjs
+      - name: Render and verify the narrated MP4
+        run: python demo/render.py
+      - uses: actions/upload-artifact@v5
+        with:
+          name: promptvault-narrated-video
+          path: lab-output/movie/
+          if-no-files-found: error
