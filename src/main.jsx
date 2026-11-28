@@ -12,6 +12,12 @@ import { EXPOSURE } from './visitor-trace'
 import { decisionBrief } from './templates'
 import { listWorkflows, saveWorkflow, visitor, visitorId } from './workspace'
 
+import { mountRehearsal } from './rehearsal/desk.mjs'
+import './rehearsal/desk.css'
+import archive from '../evidence/synthetic-flagsmith.json'
+import repeat from '../evidence/release-rehearsal.json'
+import sampleMarkdown from '../examples/Bench-test-handoff.md?raw'
+
 const loading = { variant: CONTROL, enrolled: false, source: 'loading', reason: 'Resolving your visitor assignment.' }
 
 function App() {
@@ -174,5 +180,7 @@ function App() {
     </>
   )
 }
+
+if (demoMode) mountRehearsal({ archive, repeat, sampleMarkdown })
 
 createRoot(document.getElementById('root')).render(<App />)

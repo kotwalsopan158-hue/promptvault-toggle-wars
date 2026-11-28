@@ -1,0 +1,34 @@
+{
+  "run_id": "run_82ac3fa520c77fb47583cd699c6bf805",
+  "traffic": "synthetic",
+  "started_at": "2026-11-27T17:08:18.274Z",
+  "finished_at": "2026-11-27T17:08:20.139Z",
+  "flag": "onboarding_empty_state",
+  "event": "first_workflow_created",
+  "experiment_ids": [
+    1
+  ],
+  "assumed_save_probabilities": {
+    "control": 0.16,
+    "guided_templates": 0.29
+  },
+  "visitors_attempted": 100,
+  "visitors_skipped": 0,
+  "sdk_queued_by_arm": {
+    "control": {
+      "exposures": 54,
+      "conversions": 8
+    },
+    "guided_templates": {
+      "exposures": 46,
+      "conversions": 11
+    }
+  },
+  "http_accepted_distinct_ids": {
+    "exposures": 100,
+    "conversions": 19
+  },
+  "all_queued_events_acknowledged": true,
+  "stopped_reason": null,
+  "interpretation": "HTTP totals count identities in batches acknowledged by ingestion. Verify warehouse counts and Bayesian results in Flagsmith. This batch contains synthetic visitors."
+}

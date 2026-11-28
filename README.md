@@ -120,6 +120,16 @@ Without a live enrollment, **Event trace** opens a labeled example from a script
 
 Choose **Recorded result** to inspect the dated warehouse snapshot alongside the running visitor session. It shows saves over exposures, relative lift, win probability, and a 95% credible interval drawn across a zero line. **Verify the warehouse run** opens the run behind those numbers. The snapshot stays fixed while you run fresh batches. [Open the result directly](https://kotwalsopan158-hue.github.io/promptvault-toggle-wars/#results)
 
+## Compare two runs and reuse a bench workflow
+
+Open **Compare runs** in the demo workspace to inspect two warehouse snapshots taken on 27 November 2026. Each used one scripted save plus three 100-visitor batches. The observations come from independent runs with the same simulation rules. Click **View credible intervals** to see both on one relative-lift axis. **Download comparison CSV** exports the two arms for each run, including counts, data source, timestamp and any available warehouse inference. Participant links and research builds hide these controls.
+
+Use **Compare my own run** with a simulator receipt or the lab’s synthetic warehouse JSON. The desk checks arm counts and delivery totals. It leaves Bayesian fields empty for a receipt, and withholds arm-rate comparisons for incomplete delivery. The [example batch](examples/Recorded-100-visitors.json) contains 100 acknowledged exposures and 19 first saves. [Source run](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/runs/46039120780)
+
+Open **Bench template** to download the [bench-test handoff](examples/Bench-test-handoff.md). Import it into either workflow editor, save once and fill in the board and observations from the library. Both arms use the same editor and first-save event.
+
+The second [warehouse snapshot](evidence/release-rehearsal.json) recorded 24 saves from 157 control visitors and 40 from 144 guided visitors. Its observed gain was 12.49 percentage points, or 81.7% relative lift. Flagsmith gave guided a 97.4% win probability and a 95% credible interval from −0.8% to +164.2% lift. Both archived intervals crossed zero. The human study awaits participants. [Source run](https://github.com/kotwalsopan158-hue/promptvault-toggle-wars/actions/runs/46064688711)
+
 ## Experiment results
 
 ### Verified synthetic run

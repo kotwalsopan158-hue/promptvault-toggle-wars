@@ -1,0 +1,58 @@
+.pv-film-bar, .pv-film-dialog { font-family: 'DM Sans Variable', 'Segoe UI', sans-serif; }
+.pv-film-bar { background: #282139; color: #fff; }
+.pv-film-bar > div { max-width: 1224px; min-height: 39px; padding: 5px 48px; margin: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 13px; }
+.pv-film-bar strong { margin-right: auto; font-size: .86rem; font-weight: 600; letter-spacing: .015em; }
+.pv-film-bar button { border: 0; background: transparent; color: #f5efff; padding: 4px 5px; text-decoration: underline; text-underline-offset: .22em; font-size: .87rem; }
+.pv-film-bar button:hover { color: white; }
+.pv-film-dialog { box-sizing: border-box; inset: 0; margin: auto; padding: 0 24px 14px; width: min(48rem,calc(100vw - 24px)); max-height: 89dvh; overflow: auto; color: #252134; background: #fff; border: 1px solid #ccc3db; border-radius: 16px; box-shadow: 0 14px 75px #20183136; }
+.pv-film-dialog::backdrop { background: #201a32a8; }
+.pv-film-dialog [hidden] { display: none !important; }
+.pv-film-dialog header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 0 -24px; padding: 19px 24px 17px; background: #f5f1fb; }
+.pv-film-dialog header .pv-eyebrow, .pv-film-dialog .pv-template .pv-eyebrow { margin: 0; color: #654695; font-size: .82rem; font-weight: 650; letter-spacing: .045em; }
+.pv-film-dialog h2 { margin: 2px 0 0; font-size: 1.8rem; line-height: 1.14; letter-spacing: -.045em; font-weight: 660; }
+.pv-film-dialog nav { display: flex; gap: 6px; margin: 15px 0; }
+.pv-film-dialog button, .pv-film-dialog summary { cursor: pointer; }
+.pv-film-dialog button { padding: .48rem .82rem; border: 1px solid #c9c2d5; border-radius: 7px; background: #fff; color: #382c50; font-size: .9rem; font-weight: 600; }
+.pv-film-dialog button:hover { background: #f3f0f8; }
+.pv-film-dialog nav button[aria-pressed=true], .pv-film-dialog [data-template] { background: #4e3284; border-color: #4e3284; color: #fff; }
+.pv-film-dialog h3 { margin: 8px 0 4px; font-size: 1.25rem; line-height: 1.3; letter-spacing: -.025em; font-weight: 650; }
+.pv-film-dialog p { margin: 6px 0; line-height: 1.5; font-size: .96rem; }
+.pv-film-dialog .pv-comparison { border: 1px solid #ded8e7; border-radius: 10px; margin: 12px 0; overflow: hidden; }
+.pv-film-dialog table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .93rem; }
+.pv-film-dialog caption { text-align: left; padding: 8px 10px; font-size: .84rem; color: #554765; background: #f5f2fa; }
+.pv-film-dialog th, .pv-film-dialog td { padding: 6px 10px; vertical-align: middle; border-top: 1px solid #e9e4ee; text-align: right; line-height: 1.36; overflow-wrap: anywhere; }
+.pv-film-dialog th:first-child { width: 42%; text-align: left; }
+.pv-film-dialog tbody th { font-weight: 500; }
+.pv-film-dialog tbody td { font-variant-numeric: tabular-nums; }
+.pv-film-dialog .pv-status, .pv-film-dialog .pv-note, .pv-film-dialog .pv-import p { font-size: .86rem; color: #5b5467; }
+.pv-film-dialog .pv-actions, .pv-film-dialog .pv-sources { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: 12px 0; }
+.pv-film-dialog .pv-sources a { font-size: .85rem; color: #57368d; text-decoration: underline; text-underline-offset: .16em; }
+.pv-film-dialog .pv-import, .pv-film-dialog .pv-sample-notes { margin-top: 14px; border-top: 1px solid #e2dce8; padding-top: 11px; }
+.pv-film-dialog summary { font-size: .94rem; font-weight: 650; }
+.pv-film-dialog label { display: block; margin-top: 7px; }
+.pv-film-dialog input[type=file] { font-size: .9rem; }
+.pv-film-dialog .pv-errors { color: #943131; }
+.pv-film-dialog .pv-feedback { color: #594385; font-size: .85rem; }
+.pv-film-dialog .pv-template { margin: 12px 0; padding: 13px 16px; border: 1px solid #ded6ea; border-radius: 10px; background: #f8f5fc; }
+.pv-film-dialog pre { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font: .94rem/1.45 'Segoe UI',sans-serif; }
+.pv-film-dialog textarea.pv-manual { min-height: 72px; }
+.pv-film-dialog .pv-sample-notes button { margin-top: 6px; }
+@media(max-width: 580px) {
+  .pv-film-bar > div { padding: 5px 13px; gap: 4px 9px; }
+  .pv-film-dialog { padding: 0 13px 12px; max-height: 92dvh; }
+  .pv-film-dialog header { margin: 0 -13px; padding: 15px 13px; }
+  .pv-film-dialog th, .pv-film-dialog td { padding: 6px 4px; font-size: .81rem; }
+  .pv-film-dialog th:first-child { width: 37%; }
+}
+
+.pv-ranges { margin: 12px 0; }
+.pv-ranges summary { color: #4e3284; font-weight: 650; width: fit-content; }
+.pv-range-row { display: grid; grid-template-columns: minmax(80px, 8rem) minmax(0, 1fr); align-items: center; gap: 10px; min-height: 27px; font-size: .85rem; }
+.pv-range-track { position: relative; border-bottom: 1px solid #d5d2d9; height: 1px; }
+.pv-range-zero, .pv-range-dot, .pv-range-band { position: absolute; display: block; }
+.pv-range-zero { border-left: 2px dashed #1e2635; height: 23px; top: -11px; }
+.pv-range-band { height: 6px; top: -3px; background: #935dc6; border-radius: 4px; }
+.pv-range-dot { height: 10px; width: 10px; top: -5px; border-radius: 50%; background: #40265e; transform: translateX(-50%); }
+@media (forced-colors: active) {
+  .pv-range-band, .pv-range-dot { background: Highlight; forced-color-adjust: none; }
+}
