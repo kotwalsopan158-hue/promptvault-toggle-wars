@@ -217,7 +217,6 @@ export function mountRehearsal({ archive, repeat, sampleMarkdown }) {
     '<textarea class="pv-manual" aria-label="Select and copy example notes" rows="2" readonly hidden></textarea></section>',
     '<p class="pv-feedback" role="status" aria-live="polite"></p>'
   ].join('')
-  document.body.append(dialog)
   const one = s => dialog.querySelector(s)
   const all = s => [...dialog.querySelectorAll(s)]
   const feedback = one('.pv-feedback')
@@ -273,12 +272,18 @@ export function mountRehearsal({ archive, repeat, sampleMarkdown }) {
     }
   }
   bar.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => {
-    opener = b; view(b.dataset.open); dialog.showModal()
+    opener = b
+    document.body.append(dialog)
+    view(b.dataset.open)
+    dialog.showModal()
     one('.pv-close').focus()
   }))
   all('[data-view]').forEach(b => b.addEventListener('click', () => view(b.dataset.view)))
   one('.pv-close').addEventListener('click', () => dialog.close())
-  dialog.addEventListener('close', () => opener?.focus())
+  dialog.addEventListener('close', () => {
+    dialog.remove()
+    opener?.focus()
+  })
   one('[data-line]').addEventListener('click', () => copy(recordingLine(current), '[data-panel="compare"] .pv-manual', 'Result summary copied.'))
   one('[data-csv]').addEventListener('click', () => {
     download(comparisonCsv([['Archived run', archived], [one('[data-current]').textContent, current]]),
